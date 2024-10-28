@@ -1,0 +1,13 @@
+{
+  "version": "2",
+  "sql": [{
+    "schema": "./db/schema.sql",
+    "queries": "./db/queries",
+    "engine": "postgresql",
+    "gen": {
+      "go": {
+        "out": "./db/sqlc"
+      }
+    }
+  }]
+}

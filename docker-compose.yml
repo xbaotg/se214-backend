@@ -1,0 +1,13 @@
+services:
+  # postgres:
+  #   image: postgres:alpine3.20
+  #   environment:
+  #     - POSTGRES_USER=root
+  #     - POSTGRES_PASSWORD=aictuongbck
+  #     - POSTGRES_DB=se214
+
+  backend:
+    container_name: se214_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
