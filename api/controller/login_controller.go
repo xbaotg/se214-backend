@@ -26,6 +26,18 @@ type LoginResponse struct {
 	RefreshTokenExpiresIn time.Time
 }
 
+// Login user
+// @Summary Login user
+// @Description Login user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param LoginRequest body controller.LoginRequest true "LoginRequest"
+// @Success 200 {object} controller.LoginResponse
+// @Failure 400 {object} model.Response
+// @Failure 404 {object} model.Response
+// @Failure 500 {object} model.Response
+// @Router /login [post]
 func Login(c *gin.Context, app *bootstrap.App) {
 	req := LoginRequest{}
 

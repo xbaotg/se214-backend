@@ -22,6 +22,18 @@ type RefreshTokenResponse struct {
 	RefreshTokenExpiresIn time.Time
 }
 
+// Refresh token
+// @Summary Refresh token
+// @Description Refresh token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param RefreshTokenRequest body controller.RefreshTokenRequest true "RefreshTokenRequest"
+// @Success 200 {object} controller.RefreshTokenResponse
+// @Failure 400 {object} model.Response
+// @Failure 404 {object} model.Response
+// @Failure 500 {object} model.Response
+// @Router /refresh-token [post]
 func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	req := RefreshTokenRequest{}
 

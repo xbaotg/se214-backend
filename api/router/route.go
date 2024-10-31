@@ -23,4 +23,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	})
 
 	// user routes
+	r.POST("/user-info", func(c *gin.Context) {
+		controller.GetUserInfo(c, app)
+	})
 }

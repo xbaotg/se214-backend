@@ -15,6 +15,18 @@ type LogoutRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
+// Logout user
+// @Summary Logout user
+// @Description Logout user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param LogoutRequest body controller.LogoutRequest true "LogoutRequest"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Failure 404 {object} model.Response
+// @Failure 500 {object} model.Response
+// @Router /logout [post]
 func Logout(c *gin.Context, app *bootstrap.App) {
 	req := LogoutRequest{}
 

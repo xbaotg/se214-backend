@@ -79,3 +79,45 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	)
 	return i, err
 }
+
+const getUserById = `-- name: GetUserById :one
+SELECT user_id, username, password, user_email, user_fullname, user_role, year, created_at, updated_at FROM users WHERE user_id = $1
+`
+
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Password,
+		&i.UserEmail,
+		&i.UserFullname,
+		&i.UserRole,
+		&i.Year,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const validateNewUser = `-- name: ValidateNewUser :one
+SELECT user_id, username, password, user_email, user_fullname, user_role, year, created_at, updated_at FROM users WHERE username = $1 OR user_email = $2
+`
+
+func (q *Queries) ValidateNewUser(ctx context.Context, username, user_email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, validateNewUser, username,user_email)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Password,
+		&i.UserEmail,
+		&i.UserFullname,
+		&i.UserRole,
+		&i.Year,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

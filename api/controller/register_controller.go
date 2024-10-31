@@ -18,6 +18,18 @@ type RegisterRequest struct {
 	UserEmail    string `json:"user_email" binding:"required,email"`
 }
 
+// Register user
+// @Summary Register user
+// @Description Register user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param RegisterRequest body controller.RegisterRequest true "RegisterRequest"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Failure 404 {object} model.Response
+// @Failure 500 {object} model.Response
+// @Router /register [post]
 func Register(c *gin.Context, app *bootstrap.App) {
 	r := RegisterRequest{}
 
@@ -27,6 +39,15 @@ func Register(c *gin.Context, app *bootstrap.App) {
 			Message: err.Error(),
 		})
 
+		return
+	}
+
+	user, err := app.DB.ValidateNewUser(c, r.Username, r.UserEmail)
+	if err == nil {
+		c.JSON(403, model.Response{
+			Status: false,
+			Message: "User existed",
+		})
 		return
 	}
 
@@ -43,7 +64,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	user, err := app.DB.CreateUser(c, sqlc.CreateUserParams{
+	user, err = app.DB.CreateUser(c, sqlc.CreateUserParams{
 		UserID:       internal.GenerateUUID(),
 		Username:     r.Username,
 		UserFullname: r.UserFullname,
@@ -68,6 +89,15 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	c.JSON(200, model.Response{
 		Status:  true,
 		Message: "User created",
-		Data:    user,
+		Data:    UserInfoResponse{
+			UserID:       user.UserID,
+			Username:     user.Username,
+			UserEmail:    user.UserEmail,
+			UserFullname: user.UserFullname,
+			UserRole:     user.UserRole,
+			Year:         user.Year,
+			CreatedAt:    user.CreatedAt,
+			UpdatedAt:    user.UpdatedAt,
+		},
 	})
 }
