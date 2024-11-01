@@ -101,6 +101,33 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
+const updatPassword = `-- name: UpdatPassword :one
+UPDATE users SET password = $1, updated_at = $2 WHERE user_id = $3 RETURNING user_id, username, password, user_email, user_fullname, user_role, year, created_at, updated_at
+`
+
+type UpdatPasswordParams struct {
+	Password  string
+	UpdatedAt time.Time
+	UserID    uuid.UUID
+}
+
+func (q *Queries) UpdatPassword(ctx context.Context, arg UpdatPasswordParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updatPassword, arg.Password, arg.UpdatedAt, arg.UserID)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Password,
+		&i.UserEmail,
+		&i.UserFullname,
+		&i.UserRole,
+		&i.Year,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const validateNewUser = `-- name: ValidateNewUser :one
 SELECT user_id, username, password, user_email, user_fullname, user_role, year, created_at, updated_at FROM users WHERE username = $1 OR user_email = $2
 `

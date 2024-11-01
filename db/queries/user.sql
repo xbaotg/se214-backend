@@ -13,3 +13,6 @@ SELECT * FROM users WHERE user_id = $1;
 
 -- name: ValidateNewUser :one
 SELECT * FROM users WHERE username = $1 OR user_email = $2;
+
+-- name: UpdatPassword :one
+UPDATE users SET password = $1, updated_at = $2 WHERE user_id = $3 RETURNING *;

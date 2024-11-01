@@ -31,7 +31,7 @@ type UserInfoResponse struct {
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
-// @Router /user-info [post]
+// @Router /user/info [post]
 func GetUserInfo(c *gin.Context, app *bootstrap.App) {
 	sess, exists := c.Get("session")
 	if !exists {
