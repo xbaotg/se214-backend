@@ -2,28 +2,42 @@ package router
 
 import (
 	"be/api/controller"
+	"be/api/middleware"
 	"be/bootstrap"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoute(r *gin.Engine, app *bootstrap.App) {
+	// public routes
+	publicRouter := r.Group("")
+
 	// auth routes
-	r.POST("/register", func(c *gin.Context) {
+	publicRouter.POST("/register", func(c *gin.Context) {
 		controller.Register(c, app)
 	})
-	r.POST("/login", func(c *gin.Context) {
+	publicRouter.POST("/login", func(c *gin.Context) {
 		controller.Login(c, app)
 	})
-	r.POST("/logout", func(c *gin.Context) {
+
+	// ----------------
+
+	// protected routes
+	protectedRouter := r.Group("")
+	protectedRouter.Use(func(ctx *gin.Context) {
+		middleware.SessionMiddleware(app)(ctx)
+	})
+
+	// auth routes
+	protectedRouter.POST("/logout", func(c *gin.Context) {
 		controller.Logout(c, app)
 	})
-	r.POST("/refresh-token", func(c *gin.Context) {
+	protectedRouter.POST("/refresh-token", func(c *gin.Context) {
 		controller.RefreshToken(c, app)
 	})
 
 	// user routes
-	r.POST("/user-info", func(c *gin.Context) {
+	protectedRouter.POST("/user-info", func(c *gin.Context) {
 		controller.GetUserInfo(c, app)
 	})
 }

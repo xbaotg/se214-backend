@@ -5,15 +5,10 @@ import (
 	"be/db/sqlc"
 	"be/internal"
 	"be/model"
-	"database/sql"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" binding:"required"`
-}
 
 type RefreshTokenResponse struct {
 	AccessToken           string
@@ -28,47 +23,17 @@ type RefreshTokenResponse struct {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param RefreshTokenRequest body controller.RefreshTokenRequest true "RefreshTokenRequest"
 // @Success 200 {object} controller.RefreshTokenResponse
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
 // @Router /refresh-token [post]
 func RefreshToken(c *gin.Context, app *bootstrap.App) {
-	req := RefreshTokenRequest{}
+	sess, exists := c.Get("session")
 
-	// validate request
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, model.Response{
-			Status:  false,
-			Message: err.Error(),
-		})
-		return
-	}
+	if !exists {
+		app.Logger.Error().Msg("Session not found")
 
-	// validate refresh token
-	refreshPayload, err := app.TokenMaker.VerifyToken(req.RefreshToken)
-	if err != nil {
-		c.JSON(401, model.Response{
-			Status:  false,
-			Message: "Invalid token",
-		})
-		return
-	}
-
-	// get user from refresh token
-	session, err := app.DB.GetSessionBySessionId(c, refreshPayload.ID)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(404, model.Response{
-				Status:  false,
-				Message: "Session not found",
-			})
-			return
-		}
-
-		app.Logger.Error().Err(err).Msg(err.Error())
 		c.JSON(500, model.Response{
 			Status:  false,
 			Message: "Internal server error",
@@ -76,22 +41,8 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	// check if refresh token is valid
-	if time.Now().After(session.ExpiresIn) {
-		c.JSON(401, model.Response{
-			Status:  false,
-			Message: "Refresh token expired",
-		})
-		return
-	}
-
-	if (!session.IsActive) || (session.RefreshToken != req.RefreshToken) {
-		c.JSON(401, model.Response{
-			Status:  false,
-			Message: "Invalid token",
-		})
-		return
-	}
+	// get user from refresh token
+	session := sess.(sqlc.Session)
 
 	// generate new access token
 	accessToken, AccessTokenPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTExpire))

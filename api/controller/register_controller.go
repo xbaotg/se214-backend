@@ -42,10 +42,14 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	user, err := app.DB.ValidateNewUser(c, r.Username, r.UserEmail)
+	user, err := app.DB.ValidateNewUser(c, sqlc.ValidateNewUserParams{
+		Username:  r.Username,
+		UserEmail: r.UserEmail,
+	})
+
 	if err == nil {
 		c.JSON(403, model.Response{
-			Status: false,
+			Status:  false,
 			Message: "User existed",
 		})
 		return
@@ -89,7 +93,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	c.JSON(200, model.Response{
 		Status:  true,
 		Message: "User created",
-		Data:    UserInfoResponse{
+		Data: UserInfoResponse{
 			UserID:       user.UserID,
 			Username:     user.Username,
 			UserEmail:    user.UserEmail,

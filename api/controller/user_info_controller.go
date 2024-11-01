@@ -21,42 +21,31 @@ type UserInfoResponse struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-type UserInfoRequest struct {
-	AccessToken string `json:"access_token" binding:"required"`
-}
-
 // Get user info
 // @Summary Get user info
 // @Description Get user info
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param UserInfoRequest body controller.UserInfoRequest true "UserInfoRequest"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
 // @Router /user-info [post]
 func GetUserInfo(c *gin.Context, app *bootstrap.App) {
-	var req UserInfoRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, model.Response{
+	sess, exists := c.Get("session")
+	if !exists {
+		app.Logger.Error().Msg("Session not found")
+		c.JSON(500, model.Response{
 			Status:  false,
-			Message: err.Error(),
+			Message: "Internal server error",
 		})
 		return
 	}
 
-	payload, err := app.TokenMaker.VerifyToken(req.AccessToken)
-	if err != nil {
-		c.JSON(401, model.Response{
-			Status:  false,
-			Message: "Invalid token",
-		})
-		return
-	}
+	session := sess.(sqlc.Session)
 
-	user, err := app.DB.GetUserByUsername(c, payload.Username)
+	user, err := app.DB.GetUserById(c, session.UserID)
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		c.JSON(500, model.Response{

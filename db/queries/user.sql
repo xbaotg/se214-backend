@@ -7,3 +7,9 @@ INSERT INTO users (
 
 -- name: GetUserByUsername :one
 SELECT * FROM users WHERE username = $1;
+
+-- name: GetUserById :one
+SELECT * FROM users WHERE user_id = $1;
+
+-- name: ValidateNewUser :one
+SELECT * FROM users WHERE username = $1 OR user_email = $2;
