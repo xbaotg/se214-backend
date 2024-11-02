@@ -67,6 +67,9 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	protectedRouter.DELETE("/course/delete", func(c *gin.Context) {
 		coursesController.DeleteCourse(c, app)
 	})
+	protectedRouter.POST("/course/edit", func(c *gin.Context) {
+		coursesController.EditCourse(c, app)
+	})
 
 	// department routes
 	protectedRouter.POST("/department/create", func(c *gin.Context) {
