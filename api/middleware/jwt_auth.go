@@ -3,12 +3,12 @@ package middleware
 import (
 	"be/bootstrap"
 	"be/internal"
-	"be/model"
-	"database/sql"
-	"net/http"
+	"be/models"
+	"errors"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
@@ -16,12 +16,8 @@ func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 		// Get the refresh token from the request header
 		refreshToken := c.GetHeader("Authorization")
 		if refreshToken == "" {
-			c.JSON(http.StatusBadRequest, model.Response{
-				Status:  false,
-				Message: "Missing refresh token",
-			})
-
 			if shouldCancel {
+				internal.Respond(c, 400, false, "Missing refresh token", nil)
 				c.Abort()
 			}
 
@@ -34,31 +30,28 @@ func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 		if err != nil {
 			app.Logger.Error().Msg(err.Error())
 
-			c.JSON(http.StatusUnauthorized, model.Response{
-				Status:  false,
-				Message: "Invalid token",
-			})
 			if shouldCancel {
+				internal.Respond(c, 401, false, "Invalid token", nil)
 				c.Abort()
 			}
 			return
 		}
 
 		// Get the session by the token's ID
-		session, err := app.DB.GetSessionBySessionId(c, refreshPayload.ID)
-
-		if err != nil {
-			if err == sql.ErrNoRows {
-				internal.Respond(c, 404, false, "Session not found", nil)
+		// session, err := app.DB.GetSessionBySessionId(c, refreshPayload.ID)
+		session := models.Session{ID: refreshPayload.ID}
+		if err := app.DB.First(&session).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				if shouldCancel {
+					internal.Respond(c, 404, false, "Session not found", nil)
 					c.Abort()
 				}
 				return
 			}
 
 			app.Logger.Error().Err(err).Msg("Failed to get session")
-			internal.Respond(c, 500, false, "Internal server error", nil)
 			if shouldCancel {
+				internal.Respond(c, 500, false, "Internal server error", nil)
 				c.Abort()
 			}
 			return
@@ -66,16 +59,16 @@ func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 
 		// check if refresh token is valid
 		if time.Now().After(session.ExpiresIn) {
-			internal.Respond(c, 401, false, "Refresh token expired", nil)
 			if shouldCancel {
+				internal.Respond(c, 401, false, "Refresh token expired", nil)
 				c.Abort()
 			}
 			return
 		}
 
 		if (!session.IsActive) || (session.RefreshToken != refreshToken) {
-			internal.Respond(c, 401, false, "Invalid token", nil)
 			if shouldCancel {
+				internal.Respond(c, 401, false, "Invalid token", nil)
 				c.Abort()
 			}
 			return

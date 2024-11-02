@@ -2,8 +2,8 @@ package auth
 
 import (
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,10 +14,10 @@ import (
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.Response
-// @Failure 400 {object} model.Response
-// @Failure 404 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 404 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /logout [post]
 func Logout(c *gin.Context, app *bootstrap.App) {
 	sess, exists := c.Get("session")
@@ -29,16 +29,10 @@ func Logout(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// get user from refresh token
-	session := sess.(sqlc.Session)
+	session := sess.(models.Session)
 
 	// revoke refresh token
-	err := app.DB.RevolveSession(c, sqlc.RevolveSessionParams{
-		SessionID: session.SessionID,
-		UpdatedAt: internal.GetCurrentTime(),
-		IsActive:  false,
-	})
-
-	if err != nil {
+	if err := app.DB.Model(&session).Updates(models.Session{IsActive: false}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return

@@ -26,6 +26,11 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 		authController.Login(c, app)
 	})
 
+	// department routes
+	publicRouter.GET("/department/list", func(c *gin.Context) {
+		departmentsController.ListDepartment(c, app)
+	})
+
 	// ----------------
 
 	// protected routes
@@ -58,8 +63,5 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// department routes
 	protectedRouter.POST("/department/create", func(c *gin.Context) {
 		departmentsController.CreateDepartment(c, app)
-	})
-	protectedRouter.GET("/department/list", func(c *gin.Context) {
-		departmentsController.ListDepartment(c, app)
 	})
 }

@@ -1,13 +1,13 @@
 package internal
 
 import (
-	"be/model"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Respond(c *gin.Context, statusCode int, success bool, message string, data interface{}) {
-	c.JSON(statusCode, model.Response{
+	c.JSON(statusCode, models.Response{
 		Status:  success,
 		Message: message,
 		Data:    data,

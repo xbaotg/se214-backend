@@ -2,27 +2,44 @@ package courses
 
 import (
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type CreateCourseRequest struct {
-	CourseTeacherID  uuid.UUID `json:"course_teacher_id" binding:"required"`
-	CourseDepartment uuid.UUID `json:"course_department" binding:"required"`
-	CourseName       string    `json:"course_name" binding:"required,min=3,max=100"`
-	CourseFullname   string    `json:"course_fullname" binding:"required,min=5,max=200"`
-	CourseCredit     int32     `json:"course_credit" binding:"required,min=1,max=12"`
-	CourseYear       int32     `json:"course_year" binding:"required,min=2000,max=2100"`
-	CourseSemester   int32     `json:"course_semester" binding:"required,oneof=1 2 3"`
-	CourseStartShift int32     `json:"course_start_shift" binding:"required,min=1,max=10"`
-	CourseEndShift   int32     `json:"course_end_shift" binding:"required,min=1,max=10"`
-	CourseDay        sqlc.Day  `json:"course_day" binding:"required,oneof=monday tuesday wednesday thursday friday saturday sunday"`
-	MaxEnroll        int32     `json:"max_enroll" binding:"required,min=1,max=1000"`
-	CurrentEnroll    int32     `json:"current_enroll" binding:"min=0,max=1000"`
-	CourseRoom       string    `json:"course_room" binding:"required,min=2,max=50"`
+	CourseTeacherID  uuid.UUID  `json:"course_teacher_id" binding:"required"`
+	CourseDepartment uuid.UUID  `json:"course_department" binding:"required"`
+	CourseName       string     `json:"course_name" binding:"required,min=3,max=100"`
+	CourseFullname   string     `json:"course_fullname" binding:"required,min=5,max=200"`
+	CourseCredit     int32      `json:"course_credit" binding:"required,min=1,max=12"`
+	CourseYear       int32      `json:"course_year" binding:"required,min=2000,max=2100"`
+	CourseSemester   int32      `json:"course_semester" binding:"required,oneof=1 2 3"`
+	CourseStartShift int32      `json:"course_start_shift" binding:"required,min=1,max=10"`
+	CourseEndShift   int32      `json:"course_end_shift" binding:"required,min=1,max=10"`
+	CourseDay        models.Day `json:"course_day" binding:"required,oneof=monday tuesday wednesday thursday friday saturday sunday"`
+	MaxEnroll        int32      `json:"max_enroll" binding:"required,min=1,max=1000"`
+	CurrentEnroll    int32      `json:"current_enroll" binding:"min=0,max=1000"`
+	CourseRoom       string     `json:"course_room" binding:"required,min=2,max=50"`
+}
+
+type CreateCourseResponse struct {
+	ID               uuid.UUID  `json:"id"`
+	CourseTeacherID  uuid.UUID  `json:"course_teacher_id"`
+	CourseDepartment uuid.UUID  `json:"course_department"`
+	CourseName       string     `json:"course_name"`
+	CourseFullname   string     `json:"course_fullname"`
+	CourseCredit     int32      `json:"course_credit"`
+	CourseYear       int32      `json:"course_year"`
+	CourseSemester   int32      `json:"course_semester"`
+	CourseStartShift int32      `json:"course_start_shift"`
+	CourseEndShift   int32      `json:"course_end_shift"`
+	CourseDay        models.Day `json:"course_day"`
+	MaxEnroll        int32      `json:"max_enroll"`
+	CurrentEnroll    int32      `json:"current_enroll"`
+	CourseRoom       string     `json:"course_room"`
 }
 
 // Create course
@@ -32,15 +49,15 @@ type CreateCourseRequest struct {
 // @Accept json
 // @Produce json
 // @Param CreateCourseRequest body CreateCourseRequest true "CreateCourseRequest"
-// @Success 200 {object} model.Response
-// @Failure 400 {object} model.Response
-// @Failure 403 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 403 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /course/create [post]
 func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	sess, _ := c.Get("session")
-	session := sess.(sqlc.Session)
+	session := sess.(models.Session)
 
 	// request validation
 	req := CreateCourseRequest{}
@@ -60,21 +77,22 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// get user info
-	user, err := app.DB.GetUserById(c, session.UserID)
-	if err != nil {
-		app.Logger.Error().Err(err).Msg(err.Error())
+	user := models.User{
+		ID: session.UserID,
+	}
+	if err := app.DB.First(&user).Error; err != nil {
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
 	// check user role
-	if user.UserRole != sqlc.RoleAdmin {
+	if user.UserRole != models.RoleAdmin {
 		internal.Respond(c, 403, false, "Permission denied", nil)
 		return
 	}
 
-	// create course
-	course, err := app.DB.CreateCourse(c, sqlc.CreateCourseParams{
+	course := models.Course{
+		ID:               internal.GenerateUUID(),
 		CourseTeacherID:  req.CourseTeacherID,
 		DepartmentID:     req.CourseDepartment,
 		CourseName:       req.CourseName,
@@ -88,15 +106,27 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		MaxEnroller:      req.MaxEnroll,
 		CurrentEnroller:  req.CurrentEnroll,
 		CourseRoom:       req.CourseRoom,
-		CreatedAt:        internal.GetCurrentTime(),
-		UpdatedAt:        internal.GetCurrentTime(),
-	})
-
-	if err != nil {
+	}
+	if err := app.DB.Create(&course).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course created", course)
+	internal.Respond(c, 200, true, "Course created", CreateCourseResponse{
+		ID:               course.ID,
+		CourseTeacherID:  course.CourseTeacherID,
+		CourseDepartment: course.DepartmentID,
+		CourseName:       course.CourseName,
+		CourseFullname:   course.CourseFullname,
+		CourseCredit:     course.CourseCredit,
+		CourseYear:       course.CourseYear,
+		CourseSemester:   course.CourseSemester,
+		CourseStartShift: course.CourseStartShift,
+		CourseEndShift:   course.CourseEndShift,
+		CourseDay:        course.CourseDay,
+		MaxEnroll:        course.MaxEnroller,
+		CurrentEnroll:    course.CurrentEnroller,
+		CourseRoom:       course.CourseRoom,
+	})
 }

@@ -65,7 +65,7 @@ definitions:
         type: integer
       course_day:
         allOf:
-        - $ref: '#/definitions/sqlc.Day'
+        - $ref: '#/definitions/models.Day'
         enum:
         - monday
         - tuesday
@@ -144,15 +144,7 @@ definitions:
     - department_code
     - department_name
     type: object
-  model.Response:
-    properties:
-      data: {}
-      message:
-        type: string
-      status:
-        type: boolean
-    type: object
-  sqlc.Day:
+  models.Day:
     enum:
     - monday
     - tuesday
@@ -170,18 +162,26 @@ definitions:
     - DayFriday
     - DaySaturday
     - DaySunday
-  sqlc.Department:
+  models.Department:
     properties:
       createdAt:
         type: string
       departmentCode:
         type: string
-      departmentID:
-        type: string
       departmentName:
+        type: string
+      id:
         type: string
       updatedAt:
         type: string
+    type: object
+  models.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: boolean
     type: object
   users.ChangePassRequest:
     properties:
@@ -222,19 +222,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Create course
       tags:
       - Course
@@ -262,19 +262,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlc.Department'
+            $ref: '#/definitions/models.Department'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Create department
       tags:
       - Department
@@ -296,15 +296,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/sqlc.Department'
+            $ref: '#/definitions/models.Department'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: List department
       tags:
       - Department
@@ -330,15 +330,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Login user
       tags:
       - Auth
@@ -353,19 +353,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Logout user
       tags:
       - Auth
@@ -384,15 +384,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Refresh token
       tags:
       - Auth
@@ -420,19 +420,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Register user
       tags:
       - Auth
@@ -454,19 +454,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Change password
       tags:
       - User
@@ -481,19 +481,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.Response'
+            $ref: '#/definitions/models.Response'
       summary: Get user info
       tags:
       - User

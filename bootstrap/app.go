@@ -1,18 +1,18 @@
 package bootstrap
 
 import (
-	"be/db/sqlc"
 	"be/internal"
 
 	"os"
 	"time"
 
 	"github.com/rs/zerolog"
+	"gorm.io/gorm"
 )
 
 type App struct {
 	Config     *Config
-	DB         *sqlc.Queries
+	DB         *gorm.DB
 	Logger     zerolog.Logger
 	TokenMaker internal.Maker
 }
@@ -27,8 +27,7 @@ func NewApp() *App {
 	app.Config = NewConfig()
 
 	// connect DB
-	conn := NewConnection(app.Config)
-	app.DB = sqlc.New(conn)
+	app.DB = NewConnection(app.Config)
 
 	// create token maker
 	tokenMaker, err := internal.CreatePasetoMaker(app.Config.JWTSecret)

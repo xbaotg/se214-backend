@@ -2,8 +2,8 @@ package users
 
 import (
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,15 +20,12 @@ type ChangePassRequest struct {
 // @Accept json
 // @Produce json
 // @Param ChangePassRequest body ChangePassRequest true "ChangePassRequest"
-// @Success 200 {object} model.Response
-// @Failure 400 {object} model.Response
-// @Failure 404 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 404 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/change-pass [post]
 func ChangePassUser(c *gin.Context, app *bootstrap.App) {
-	sess, _ := c.Get("session")
-	session := sess.(sqlc.Session)
-
 	// validate request
 	req := ChangePassRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -41,9 +38,11 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	user, err := app.DB.GetUserById(c, session.UserID)
+	sess, _ := c.Get("session")
+	session := sess.(models.Session)
+	user := models.User{ID: session.UserID}
 
-	if err != nil {
+	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
@@ -62,13 +61,7 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	_, err = app.DB.UpdatPassword(c, sqlc.UpdatPasswordParams{
-		UserID:    session.UserID,
-		Password:  hashedPassword,
-		UpdatedAt: internal.GetCurrentTime(),
-	})
-
-	if err != nil {
+	if err := app.DB.Model(&user).Updates(models.User{Password: hashedPassword}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return

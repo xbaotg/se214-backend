@@ -2,14 +2,15 @@ package auth
 
 import (
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
-	"database/sql"
+	"be/models"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type LoginRequest struct {
@@ -33,9 +34,9 @@ type LoginResponse struct {
 // @Produce json
 // @Param LoginRequest body LoginRequest true "LoginRequest"
 // @Success 200 {object} LoginResponse
-// @Failure 400 {object} model.Response
-// @Failure 404 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Failure 400 {object} models.Response
+// @Failure 404 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /login [post]
 func Login(c *gin.Context, app *bootstrap.App) {
 	req := LoginRequest{}
@@ -45,9 +46,10 @@ func Login(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	user, err := app.DB.GetUserByUsername(c, req.Username)
-	if err != nil {
-		if err == sql.ErrNoRows {
+	// user, err := app.DB.GetUserByUsername(c, req.Username)
+	user := models.User{}
+	if err := app.DB.First(&user, "username = ?", req.Username).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			internal.Respond(c, 404, false, "User not found", nil)
 			return
 		}
@@ -82,15 +84,21 @@ func Login(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	session, err := app.DB.CreateSession(c, sqlc.CreateSessionParams{
-		SessionID:    refreshPayload.ID,
-		UserID:       user.UserID,
+	session := models.Session{
+		ID:           refreshPayload.ID,
+		UserID:       user.ID,
 		RefreshToken: refreshToken,
 		ExpiresIn:    refreshPayload.ExpiredAt,
 		IsActive:     true,
 		CreatedAt:    internal.GetCurrentTime(),
 		UpdatedAt:    internal.GetCurrentTime(),
-	})
+	}
+
+	if err := app.DB.Create(&session).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
@@ -99,7 +107,7 @@ func Login(c *gin.Context, app *bootstrap.App) {
 	}
 
 	internal.Respond(c, http.StatusOK, true, "Login success", LoginResponse{
-		SessionID:             session.SessionID,
+		SessionID:             session.ID,
 		AccessToken:           accessToken,
 		AccessTokenExpiresIn:  accessPayload.ExpiredAt,
 		RefreshToken:          refreshToken,

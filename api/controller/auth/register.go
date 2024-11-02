@@ -3,8 +3,8 @@ package auth
 import (
 	"be/api/controller/users"
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,10 +25,10 @@ type RegisterRequest struct {
 // @Accept json
 // @Produce json
 // @Param RegisterRequest body RegisterRequest true "RegisterRequest"
-// @Success 200 {object} model.Response
-// @Failure 400 {object} model.Response
-// @Failure 404 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 404 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /register [post]
 func Register(c *gin.Context, app *bootstrap.App) {
@@ -40,7 +40,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// if user want to register as admin
-	if sqlc.Role(r.UserRole) == sqlc.RoleAdmin || sqlc.Role(r.UserRole) == sqlc.RoleLecturer {
+	if models.Role(r.UserRole) == models.RoleAdmin || models.Role(r.UserRole) == models.RoleLecturer {
 		sess, exists := c.Get("session")
 
 		if !exists {
@@ -48,27 +48,27 @@ func Register(c *gin.Context, app *bootstrap.App) {
 			return
 		}
 
-		session := sess.(sqlc.Session)
-		user, err := app.DB.GetUserById(c, session.UserID)
+		session := sess.(models.Session)
+		user := models.User{
+			ID: session.UserID,
+		}
 
-		if err != nil {
-			app.Logger.Error().Msg(err.Error())
+		if err := app.DB.First(&user).Error; err != nil {
 			internal.Respond(c, 500, false, "Internal server error", nil)
 			return
 		}
 
-		if user.UserRole != sqlc.RoleAdmin {
+		if user.UserRole != models.RoleAdmin {
 			internal.Respond(c, 401, false, "Permission denied", nil)
 			return
 		}
 	}
 
-	user, err := app.DB.ValidateNewUser(c, sqlc.ValidateNewUserParams{
-		Username:  r.Username,
-		UserEmail: r.UserEmail,
-	})
-
-	if err == nil {
+	// user, err := app.DB.ValidateNewUser(c, sqlc.ValidateNewUserParams{
+	// 	Username:  r.Username,
+	// 	UserEmail: r.UserEmail,
+	// })
+	if affectedRow := app.DB.Where(models.User{Username: r.Username}).Or(models.User{UserEmail: r.UserEmail}).Find(models.User{}).RowsAffected; affectedRow > 0 {
 		internal.Respond(c, 403, false, "User existed", nil)
 		return
 	}
@@ -83,32 +83,41 @@ func Register(c *gin.Context, app *bootstrap.App) {
 
 	app.Logger.Info().Msg(r.UserRole)
 
-	user, err = app.DB.CreateUser(c, sqlc.CreateUserParams{
-		UserID:       internal.GenerateUUID(),
+	// user, err = app.DB.CreateUser(c, sqlc.CreateUserParams{
+	// 	UserID:       internal.GenerateUUID(),
+	// 	Username:     r.Username,
+	// 	UserFullname: r.UserFullname,
+	// 	UserEmail:    r.UserEmail,
+	// 	Password:     hashedPassword,
+	// 	UserRole:     sqlc.Role(r.UserRole),
+	// 	Year:         r.Year,
+	// 	CreatedAt:    internal.GetCurrentTime(),
+	// 	UpdatedAt:    internal.GetCurrentTime(),
+	// })
+
+	userToCreate := models.User{
+		ID:           internal.GenerateUUID(),
 		Username:     r.Username,
 		UserFullname: r.UserFullname,
 		UserEmail:    r.UserEmail,
 		Password:     hashedPassword,
-		UserRole:     sqlc.Role(r.UserRole),
+		UserRole:     models.Role(r.UserRole),
 		Year:         r.Year,
-		CreatedAt:    internal.GetCurrentTime(),
-		UpdatedAt:    internal.GetCurrentTime(),
-	})
-
-	if err != nil {
+	}
+	if err := app.DB.Create(&userToCreate).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
 	internal.Respond(c, 200, true, "User created", users.UserInfoResponse{
-		UserID:       user.UserID,
-		Username:     user.Username,
-		UserEmail:    user.UserEmail,
-		UserFullname: user.UserFullname,
-		UserRole:     user.UserRole,
-		Year:         user.Year,
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
+		UserID:       userToCreate.ID,
+		Username:     userToCreate.Username,
+		UserEmail:    userToCreate.UserEmail,
+		UserFullname: userToCreate.UserFullname,
+		UserRole:     userToCreate.UserRole,
+		Year:         userToCreate.Year,
+		CreatedAt:    userToCreate.CreatedAt,
+		UpdatedAt:    userToCreate.UpdatedAt,
 	})
 }

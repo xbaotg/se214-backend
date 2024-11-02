@@ -2,8 +2,8 @@ package auth
 
 import (
 	"be/bootstrap"
-	"be/db/sqlc"
 	"be/internal"
+	"be/models"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,13 +23,13 @@ type RefreshTokenResponse struct {
 // @Accept json
 // @Produce json
 // @Success 200 {object} RefreshTokenResponse
-// @Failure 400 {object} model.Response
-// @Failure 404 {object} model.Response
-// @Failure 500 {object} model.Response
+// @Failure 400 {object} models.Response
+// @Failure 404 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /refresh-token [post]
 func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	sess, _ := c.Get("session")
-	session := sess.(sqlc.Session)
+	session := sess.(models.Session)
 
 	// generate new access token
 	accessToken, AccessTokenPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTExpire))
@@ -48,27 +48,26 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// update session
-	_, err = app.DB.CreateSession(c, sqlc.CreateSessionParams{
-		SessionID:    refreshPayload.ID,
+	updatedSession := models.Session{
+		ID:           refreshPayload.ID,
 		UserID:       session.UserID,
 		RefreshToken: refreshToken,
 		ExpiresIn:    refreshPayload.ExpiredAt,
 		IsActive:     true,
-		CreatedAt:    internal.GetCurrentTime(),
-		UpdatedAt:    internal.GetCurrentTime(),
-	})
-	if err != nil {
-		app.Logger.Error().Err(err).Msg("Failed to create session: " + err.Error())
+	}
+
+	if err := app.DB.Create(&updatedSession).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
 	// revoke old refresh token
-	err = app.DB.RevolveSession(c, sqlc.RevolveSessionParams{
-		SessionID: session.SessionID,
-		UpdatedAt: internal.GetCurrentTime(),
-		IsActive:  false,
-	})
+	if err := app.DB.Model(&session).Updates(models.Session{IsActive: false}).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
