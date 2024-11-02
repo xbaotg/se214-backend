@@ -130,6 +130,66 @@
                 }
             }
         },
+        "/course/edit": {
+            "put": {
+                "description": "Edit course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Edit course",
+                "parameters": [
+                    {
+                        "description": "EditCourseRequest",
+                        "name": "EditCourseRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courses.EditCourseRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/department/create": {
             "post": {
                 "description": "Create department",
@@ -700,6 +760,56 @@
                     "type": "integer",
                     "maximum": 1000,
                     "minimum": 1
+                }
+            }
+        },
+        "courses.EditCourseRequest": {
+            "type": "object",
+            "required": [
+                "course_id"
+            ],
+            "properties": {
+                "course_credit": {
+                    "type": "integer"
+                },
+                "course_day": {
+                    "$ref": "#/definitions/models.Day"
+                },
+                "course_department": {
+                    "type": "string"
+                },
+                "course_end_shift": {
+                    "type": "integer"
+                },
+                "course_fullname": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_name": {
+                    "type": "string"
+                },
+                "course_room": {
+                    "type": "string"
+                },
+                "course_semester": {
+                    "type": "integer"
+                },
+                "course_start_shift": {
+                    "type": "integer"
+                },
+                "course_teacher_id": {
+                    "type": "string"
+                },
+                "course_year": {
+                    "type": "integer"
+                },
+                "current_enroll": {
+                    "type": "integer"
+                },
+                "max_enroll": {
+                    "type": "integer"
                 }
             }
         },

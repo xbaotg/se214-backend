@@ -27,6 +27,18 @@ type EditCourseRequest struct {
 	CourseRoom       string     `json:"course_room"`
 }
 
+// @Summary Edit course
+// @Description Edit course
+// @Tags Course
+// @Accept json
+// @Produce json
+// @Param EditCourseRequest body EditCourseRequest true "EditCourseRequest"
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 403 {object} models.Response
+// @Failure 500 {object} models.Response
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /course/edit [put]
 func EditCourse(c *gin.Context, app *bootstrap.App) {
 	// validate request
 	req := EditCourseRequest{}

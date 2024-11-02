@@ -130,6 +130,39 @@ definitions:
     - course_year
     - max_enroll
     type: object
+  courses.EditCourseRequest:
+    properties:
+      course_credit:
+        type: integer
+      course_day:
+        $ref: '#/definitions/models.Day'
+      course_department:
+        type: string
+      course_end_shift:
+        type: integer
+      course_fullname:
+        type: string
+      course_id:
+        type: string
+      course_name:
+        type: string
+      course_room:
+        type: string
+      course_semester:
+        type: integer
+      course_start_shift:
+        type: integer
+      course_teacher_id:
+        type: string
+      course_year:
+        type: integer
+      current_enroll:
+        type: integer
+      max_enroll:
+        type: integer
+    required:
+    - course_id
+    type: object
   departments.CreateDepartmentRequest:
     properties:
       department_code:
@@ -282,6 +315,46 @@ paths:
       summary: Delete course
       tags:
       - Courses
+  /course/edit:
+    put:
+      consumes:
+      - application/json
+      description: Edit course
+      parameters:
+      - description: EditCourseRequest
+        in: body
+        name: EditCourseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/courses.EditCourseRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Edit course
+      tags:
+      - Course
   /department/create:
     post:
       consumes:
