@@ -15,6 +15,63 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/course/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Course"
+                ],
+                "summary": "Create course",
+                "parameters": [
+                    {
+                        "description": "CreateCourseRequest",
+                        "name": "CreateCourseRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/course.CreateCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login user",
@@ -80,17 +137,6 @@ const docTemplate = `{
                     "Auth"
                 ],
                 "summary": "Logout user",
-                "parameters": [
-                    {
-                        "description": "LogoutRequest",
-                        "name": "LogoutRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.LogoutRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -132,17 +178,6 @@ const docTemplate = `{
                     "Auth"
                 ],
                 "summary": "Refresh token",
-                "parameters": [
-                    {
-                        "description": "RefreshTokenRequest",
-                        "name": "RefreshTokenRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.RefreshTokenRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -223,7 +258,59 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-info": {
+        "/user/change-pass": {
+            "post": {
+                "description": "Change password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change password",
+                "parameters": [
+                    {
+                        "description": "ChangePassRequest",
+                        "name": "ChangePassRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.ChangePassRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
             "post": {
                 "description": "Get user info",
                 "consumes": [
@@ -236,17 +323,6 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Get user info",
-                "parameters": [
-                    {
-                        "description": "UserInfoRequest",
-                        "name": "UserInfoRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UserInfoRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -313,28 +389,6 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.LogoutRequest": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "controller.RefreshTokenRequest": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
         "controller.RefreshTokenResponse": {
             "type": "object",
             "properties": {
@@ -384,14 +438,97 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.UserInfoRequest": {
+        "course.CreateCourseRequest": {
             "type": "object",
             "required": [
-                "access_token"
+                "course_credit",
+                "course_day",
+                "course_department",
+                "course_end_shift",
+                "course_fullname",
+                "course_name",
+                "course_room",
+                "course_semester",
+                "course_start_shift",
+                "course_teacher_id",
+                "course_year",
+                "current_enroll",
+                "max_enroll"
             ],
             "properties": {
-                "access_token": {
+                "course_credit": {
+                    "type": "integer",
+                    "maximum": 12,
+                    "minimum": 1
+                },
+                "course_day": {
+                    "enum": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/sqlc.Day"
+                        }
+                    ]
+                },
+                "course_department": {
                     "type": "string"
+                },
+                "course_end_shift": {
+                    "type": "integer",
+                    "maximum": 10,
+                    "minimum": 1
+                },
+                "course_fullname": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 5
+                },
+                "course_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "course_room": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "course_semester": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "course_start_shift": {
+                    "type": "integer",
+                    "maximum": 10,
+                    "minimum": 1
+                },
+                "course_teacher_id": {
+                    "type": "string"
+                },
+                "course_year": {
+                    "type": "integer",
+                    "maximum": 2100,
+                    "minimum": 2000
+                },
+                "current_enroll": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "max_enroll": {
+                    "type": "integer",
+                    "maximum": 1000,
+                    "minimum": 1
                 }
             }
         },
@@ -404,6 +541,44 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "boolean"
+                }
+            }
+        },
+        "sqlc.Day": {
+            "type": "string",
+            "enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+            ],
+            "x-enum-varnames": [
+                "DayMonday",
+                "DayTuesday",
+                "DayWednesday",
+                "DayThursday",
+                "DayFriday",
+                "DaySaturday",
+                "DaySunday"
+            ]
+        },
+        "user.ChangePassRequest": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "old_password": {
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         }

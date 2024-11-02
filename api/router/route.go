@@ -2,6 +2,7 @@ package router
 
 import (
 	authController "be/api/controller/auth"
+	courseController "be/api/controller/course"
 	userController "be/api/controller/user"
 	"be/api/middleware"
 	"be/bootstrap"
@@ -43,5 +44,10 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	})
 	protectedRouter.POST("/user/change-password", func(c *gin.Context) {
 		userController.ChangePassUser(c, app)
+	})
+
+	// course routes
+	protectedRouter.POST("/course/create", func(c *gin.Context) {
+		courseController.CreateCourse(c, app)
 	})
 }

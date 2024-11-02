@@ -1,4 +1,4 @@
-package controller
+package user
 
 import (
 	"be/bootstrap"
@@ -33,16 +33,7 @@ type UserInfoResponse struct {
 // @Failure 500 {object} model.Response
 // @Router /user/info [post]
 func GetUserInfo(c *gin.Context, app *bootstrap.App) {
-	sess, exists := c.Get("session")
-	if !exists {
-		app.Logger.Error().Msg("Session not found")
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
-		return
-	}
-
+	sess, _ := c.Get("session")
 	session := sess.(sqlc.Session)
 
 	user, err := app.DB.GetUserById(c, session.UserID)

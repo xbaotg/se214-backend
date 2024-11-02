@@ -29,19 +29,7 @@ type RefreshTokenResponse struct {
 // @Failure 500 {object} model.Response
 // @Router /refresh-token [post]
 func RefreshToken(c *gin.Context, app *bootstrap.App) {
-	sess, exists := c.Get("session")
-
-	if !exists {
-		app.Logger.Error().Msg("Session not found")
-
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
-		return
-	}
-
-	// get user from refresh token
+	sess, _ := c.Get("session")
 	session := sess.(sqlc.Session)
 
 	// generate new access token

@@ -1,4 +1,4 @@
-package controller
+package user
 
 import (
 	"be/bootstrap"
@@ -20,22 +20,14 @@ type ChangePassRequest struct {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param ChangePassRequest body controller.ChangePassRequest true "ChangePassRequest"
+// @Param ChangePassRequest body user.ChangePassRequest true "ChangePassRequest"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
 // @Router /user/change-pass [post]
 func ChangePassUser(c *gin.Context, app *bootstrap.App) {
-	sess, exists := c.Get("session")
-	if !exists {
-		app.Logger.Error().Msg("Session not found")
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
-		return
-	}
+	sess, _ := c.Get("session")
 	session := sess.(sqlc.Session)
 
 	// validate request

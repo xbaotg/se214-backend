@@ -23,20 +23,6 @@ definitions:
       sessionID:
         type: string
     type: object
-  controller.LogoutRequest:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
-  controller.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
   controller.RefreshTokenResponse:
     properties:
       accessToken:
@@ -71,12 +57,78 @@ definitions:
     - username
     - year
     type: object
-  controller.UserInfoRequest:
+  course.CreateCourseRequest:
     properties:
-      access_token:
+      course_credit:
+        maximum: 12
+        minimum: 1
+        type: integer
+      course_day:
+        allOf:
+        - $ref: '#/definitions/sqlc.Day'
+        enum:
+        - Monday
+        - Tuesday
+        - Wednesday
+        - Thursday
+        - Friday
+        - Saturday
+        - Sunday
+      course_department:
         type: string
+      course_end_shift:
+        maximum: 10
+        minimum: 1
+        type: integer
+      course_fullname:
+        maxLength: 200
+        minLength: 5
+        type: string
+      course_name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      course_room:
+        maxLength: 50
+        minLength: 2
+        type: string
+      course_semester:
+        enum:
+        - 1
+        - 2
+        - 3
+        type: integer
+      course_start_shift:
+        maximum: 10
+        minimum: 1
+        type: integer
+      course_teacher_id:
+        type: string
+      course_year:
+        maximum: 2100
+        minimum: 2000
+        type: integer
+      current_enroll:
+        minimum: 0
+        type: integer
+      max_enroll:
+        maximum: 1000
+        minimum: 1
+        type: integer
     required:
-    - access_token
+    - course_credit
+    - course_day
+    - course_department
+    - course_end_shift
+    - course_fullname
+    - course_name
+    - course_room
+    - course_semester
+    - course_start_shift
+    - course_teacher_id
+    - course_year
+    - current_enroll
+    - max_enroll
     type: object
   model.Response:
     properties:
@@ -86,9 +138,75 @@ definitions:
       status:
         type: boolean
     type: object
+  sqlc.Day:
+    enum:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+    - saturday
+    - sunday
+    type: string
+    x-enum-varnames:
+    - DayMonday
+    - DayTuesday
+    - DayWednesday
+    - DayThursday
+    - DayFriday
+    - DaySaturday
+    - DaySunday
+  user.ChangePassRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      old_password:
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
 info:
   contact: {}
 paths:
+  /course/create:
+    post:
+      consumes:
+      - application/json
+      description: Create course
+      parameters:
+      - description: CreateCourseRequest
+        in: body
+        name: CreateCourseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/course.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create course
+      tags:
+      - Course
   /login:
     post:
       consumes:
@@ -128,13 +246,6 @@ paths:
       consumes:
       - application/json
       description: Logout user
-      parameters:
-      - description: LogoutRequest
-        in: body
-        name: LogoutRequest
-        required: true
-        schema:
-          $ref: '#/definitions/controller.LogoutRequest'
       produces:
       - application/json
       responses:
@@ -162,13 +273,6 @@ paths:
       consumes:
       - application/json
       description: Refresh token
-      parameters:
-      - description: RefreshTokenRequest
-        in: body
-        name: RefreshTokenRequest
-        required: true
-        schema:
-          $ref: '#/definitions/controller.RefreshTokenRequest'
       produces:
       - application/json
       responses:
@@ -225,18 +329,45 @@ paths:
       summary: Register user
       tags:
       - Auth
-  /user-info:
+  /user/change-pass:
+    post:
+      consumes:
+      - application/json
+      description: Change password
+      parameters:
+      - description: ChangePassRequest
+        in: body
+        name: ChangePassRequest
+        required: true
+        schema:
+          $ref: '#/definitions/user.ChangePassRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Change password
+      tags:
+      - User
+  /user/info:
     post:
       consumes:
       - application/json
       description: Get user info
-      parameters:
-      - description: UserInfoRequest
-        in: body
-        name: UserInfoRequest
-        required: true
-        schema:
-          $ref: '#/definitions/controller.UserInfoRequest'
       produces:
       - application/json
       responses:

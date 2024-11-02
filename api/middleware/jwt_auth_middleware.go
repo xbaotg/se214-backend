@@ -64,6 +64,7 @@ func SessionMiddleware(app *bootstrap.App) gin.HandlerFunc {
 				Status:  false,
 				Message: "Refresh token expired",
 			})
+			c.Abort()
 			return
 		}
 
@@ -72,6 +73,7 @@ func SessionMiddleware(app *bootstrap.App) gin.HandlerFunc {
 				Status:  false,
 				Message: "Invalid token",
 			})
+			c.Abort()
 			return
 		}
 
