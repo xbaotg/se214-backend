@@ -4,7 +4,6 @@ import (
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
-	"be/model"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -36,10 +35,7 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	accessToken, AccessTokenPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTExpire))
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -47,10 +43,7 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	refreshToken, refreshPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTRefreshExpire))
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -66,10 +59,7 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	})
 	if err != nil {
 		app.Logger.Error().Err(err).Msg("Failed to create session: " + err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -82,14 +72,11 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(200, RefreshTokenResponse{
+	internal.Respond(c, 200, true, "Refresh token success", RefreshTokenResponse{
 		AccessToken:           accessToken,
 		AccessTokenExpiresIn:  AccessTokenPayload.ExpiredAt,
 		RefreshToken:          refreshToken,

@@ -3,7 +3,7 @@ package user
 import (
 	"be/bootstrap"
 	"be/db/sqlc"
-	"be/model"
+	"be/internal"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,25 +39,18 @@ func GetUserInfo(c *gin.Context, app *bootstrap.App) {
 	user, err := app.DB.GetUserById(c, session.UserID)
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(200, model.Response{
-		Status:  true,
-		Message: "Get user info successfully",
-		Data: UserInfoResponse{
-			UserID:       user.UserID,
-			Username:     user.Username,
-			UserEmail:    user.UserEmail,
-			UserFullname: user.UserFullname,
-			UserRole:     user.UserRole,
-			Year:         user.Year,
-			CreatedAt:    user.CreatedAt,
-			UpdatedAt:    user.UpdatedAt,
-		},
+	internal.Respond(c, 200, true, "Get user info successfully", UserInfoResponse{
+		UserID:       user.UserID,
+		Username:     user.Username,
+		UserEmail:    user.UserEmail,
+		UserFullname: user.UserFullname,
+		UserRole:     user.UserRole,
+		Year:         user.Year,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	})
 }

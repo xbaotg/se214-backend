@@ -4,7 +4,6 @@ import (
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
-	. "be/model"
 	"database/sql"
 	"net/http"
 	"time"
@@ -42,35 +41,23 @@ func Login(c *gin.Context, app *bootstrap.App) {
 	req := LoginRequest{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, Response{
-			Status:  false,
-			Message: err.Error(),
-		})
+		internal.Respond(c, 400, false, err.Error(), nil)
 		return
 	}
 
 	user, err := app.DB.GetUserByUsername(c, req.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(404, Response{
-				Status:  false,
-				Message: "User not found",
-			})
+			internal.Respond(c, 404, false, "User not found", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 	}
 
 	if internal.CheckPassword(req.Password, user.Password) != nil {
-		c.JSON(400, Response{
-			Status:  false,
-			Message: "Invalid password",
-		})
+		internal.Respond(c, 400, false, "Invalid password", nil)
 		return
 	}
 
@@ -79,10 +66,7 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(http.StatusInternalServerError, Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -94,12 +78,7 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-
-		c.JSON(http.StatusInternalServerError, Response{
-			Status:  false,
-			Message: err.Error(),
-		})
-
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -115,24 +94,15 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-
-		c.JSON(http.StatusInternalServerError, Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
-
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(200, Response{
-		Status:  true,
-		Message: "Login success",
-		Data: LoginResponse{
-			SessionID:             session.SessionID,
-			AccessToken:           accessToken,
-			AccessTokenExpiresIn:  accessPayload.ExpiredAt,
-			RefreshToken:          refreshToken,
-			RefreshTokenExpiresIn: refreshPayload.ExpiredAt,
-		},
+	internal.Respond(c, http.StatusOK, true, "Login success", LoginResponse{
+		SessionID:             session.SessionID,
+		AccessToken:           accessToken,
+		AccessTokenExpiresIn:  accessPayload.ExpiredAt,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiresIn: refreshPayload.ExpiredAt,
 	})
 }

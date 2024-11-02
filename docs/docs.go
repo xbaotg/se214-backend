@@ -17,11 +17,6 @@ const docTemplate = `{
     "paths": {
         "/course/create": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Create course",
                 "consumes": [
                     "application/json"
@@ -42,6 +37,14 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/course.CreateCourseRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -523,6 +526,7 @@ const docTemplate = `{
                 },
                 "current_enroll": {
                     "type": "integer",
+                    "maximum": 1000,
                     "minimum": 0
                 },
                 "max_enroll": {

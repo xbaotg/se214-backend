@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"be/bootstrap"
+	"be/internal"
 	"be/model"
 	"database/sql"
 	"net/http"
@@ -42,37 +43,26 @@ func SessionMiddleware(app *bootstrap.App) gin.HandlerFunc {
 
 		if err != nil {
 			if err == sql.ErrNoRows {
-				c.JSON(http.StatusNotFound, model.Response{
-					Status:  false,
-					Message: "Session not found",
-				})
+				internal.Respond(c, 404, false, "Session not found", nil)
 				c.Abort()
 				return
 			}
+
 			app.Logger.Error().Err(err).Msg("Failed to get session")
-			c.JSON(http.StatusInternalServerError, model.Response{
-				Status:  false,
-				Message: "Internal server error",
-			})
+			internal.Respond(c, 500, false, "Internal server error", nil)
 			c.Abort()
 			return
 		}
 
 		// check if refresh token is valid
 		if time.Now().After(session.ExpiresIn) {
-			c.JSON(401, model.Response{
-				Status:  false,
-				Message: "Refresh token expired",
-			})
+			internal.Respond(c, 401, false, "Refresh token expired", nil)
 			c.Abort()
 			return
 		}
 
 		if (!session.IsActive) || (session.RefreshToken != refreshToken) {
-			c.JSON(401, model.Response{
-				Status:  false,
-				Message: "Invalid token",
-			})
+			internal.Respond(c, 401, false, "Invalid token", nil)
 			c.Abort()
 			return
 		}

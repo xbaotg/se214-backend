@@ -4,8 +4,6 @@ import (
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
-	"be/model"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,11 +24,7 @@ func Logout(c *gin.Context, app *bootstrap.App) {
 
 	if !exists {
 		app.Logger.Error().Msg("Session not found")
-
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -46,15 +40,9 @@ func Logout(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, model.Response{
-		Status:  true,
-		Message: "Logout success",
-	})
+	internal.Respond(c, 200, true, "Logout success", nil)
 }

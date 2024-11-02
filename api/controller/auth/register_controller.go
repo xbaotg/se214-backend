@@ -5,7 +5,6 @@ import (
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
-	"be/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,11 +34,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	r := RegisterRequest{}
 
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(400, model.Response{
-			Status:  false,
-			Message: err.Error(),
-		})
-
+		internal.Respond(c, 400, false, err.Error(), nil)
 		return
 	}
 
@@ -49,10 +44,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	})
 
 	if err == nil {
-		c.JSON(403, model.Response{
-			Status:  false,
-			Message: "User existed",
-		})
+		internal.Respond(c, 403, false, "User existed", nil)
 		return
 	}
 
@@ -60,12 +52,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
-
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -83,26 +70,18 @@ func Register(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(200, model.Response{
-		Status:  true,
-		Message: "User created",
-		Data: controller.UserInfoResponse{
-			UserID:       user.UserID,
-			Username:     user.Username,
-			UserEmail:    user.UserEmail,
-			UserFullname: user.UserFullname,
-			UserRole:     user.UserRole,
-			Year:         user.Year,
-			CreatedAt:    user.CreatedAt,
-			UpdatedAt:    user.UpdatedAt,
-		},
+	internal.Respond(c, 200, true, "User created", controller.UserInfoResponse{
+		UserID:       user.UserID,
+		Username:     user.Username,
+		UserEmail:    user.UserEmail,
+		UserFullname: user.UserFullname,
+		UserRole:     user.UserRole,
+		Year:         user.Year,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	})
 }

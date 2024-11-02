@@ -4,7 +4,6 @@ import (
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
-	"be/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,18 +32,12 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 	// validate request
 	req := ChangePassRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, model.Response{
-			Status:  false,
-			Message: err.Error(),
-		})
+		internal.Respond(c, 400, false, err.Error(), nil)
 		return
 	}
 
 	if req.OldPassword == req.NewPassword {
-		c.JSON(400, model.Response{
-			Status:  false,
-			Message: "New password must be different from old password",
-		})
+		internal.Respond(c, 400, false, "New password must be different from old password", nil)
 		return
 	}
 
@@ -52,18 +45,12 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
 	if internal.CheckPassword(req.OldPassword, user.Password) != nil {
-		c.JSON(400, model.Response{
-			Status:  false,
-			Message: "Old password is incorrect",
-		})
+		internal.Respond(c, 400, false, "Old password is incorrect", nil)
 		return
 	}
 
@@ -71,10 +58,7 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
@@ -86,16 +70,9 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		c.JSON(500, model.Response{
-			Status:  false,
-			Message: "Internal server error",
-		})
+		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	c.JSON(200, model.Response{
-		Status:  true,
-		Message: "Change password success",
-	})
-
+	internal.Respond(c, 200, true, "Change password success", nil)
 }
