@@ -2,8 +2,8 @@ package router
 
 import (
 	authController "be/api/controller/auth"
-	courseController "be/api/controller/course"
-	userController "be/api/controller/user"
+	coursesController "be/api/controller/courses"
+	usersController "be/api/controller/users"
 	"be/api/middleware"
 	"be/bootstrap"
 
@@ -13,6 +13,9 @@ import (
 func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// public routes
 	publicRouter := r.Group("")
+	publicRouter.Use(func(ctx *gin.Context) {
+		middleware.SessionMiddleware(app, false)(ctx)
+	})
 
 	// auth routes
 	publicRouter.POST("/register", func(c *gin.Context) {
@@ -27,7 +30,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// protected routes
 	protectedRouter := r.Group("")
 	protectedRouter.Use(func(ctx *gin.Context) {
-		middleware.SessionMiddleware(app)(ctx)
+		middleware.SessionMiddleware(app, true)(ctx)
 	})
 
 	// auth routes
@@ -40,14 +43,14 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 
 	// user routes
 	protectedRouter.POST("/user/info", func(c *gin.Context) {
-		userController.GetUserInfo(c, app)
+		usersController.GetUserInfo(c, app)
 	})
 	protectedRouter.POST("/user/change-password", func(c *gin.Context) {
-		userController.ChangePassUser(c, app)
+		usersController.ChangePassUser(c, app)
 	})
 
 	// course routes
 	protectedRouter.POST("/course/create", func(c *gin.Context) {
-		courseController.CreateCourse(c, app)
+		coursesController.CreateCourse(c, app)
 	})
 }

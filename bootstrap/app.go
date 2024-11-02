@@ -21,7 +21,7 @@ func NewApp() *App {
 	app := App{}
 
 	// initialize logger
-	app.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
+	app.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger().With().Caller().Logger()
 
 	// initialize config
 	app.Config = NewConfig()

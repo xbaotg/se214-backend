@@ -1,4 +1,4 @@
-package course
+package courses
 
 import (
 	"be/bootstrap"
@@ -19,9 +19,9 @@ type CreateCourseRequest struct {
 	CourseSemester   int32     `json:"course_semester" binding:"required,oneof=1 2 3"`
 	CourseStartShift int32     `json:"course_start_shift" binding:"required,min=1,max=10"`
 	CourseEndShift   int32     `json:"course_end_shift" binding:"required,min=1,max=10"`
-	CourseDay        sqlc.Day  `json:"course_day" binding:"required,oneof=Monday Tuesday Wednesday Thursday Friday Saturday Sunday"`
+	CourseDay        sqlc.Day  `json:"course_day" binding:"required,oneof=monday tuesday wednesday thursday friday saturday sunday"`
 	MaxEnroll        int32     `json:"max_enroll" binding:"required,min=1,max=1000"`
-	CurrentEnroll    int32     `json:"current_enroll" binding:"required,min=0,max=1000"`
+	CurrentEnroll    int32     `json:"current_enroll" binding:"min=0,max=1000"`
 	CourseRoom       string    `json:"course_room" binding:"required,min=2,max=50"`
 }
 

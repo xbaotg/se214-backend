@@ -1,7 +1,7 @@
-package controller
+package auth
 
 import (
-	controller "be/api/controller/user"
+	"be/api/controller/users"
 	"be/bootstrap"
 	"be/db/sqlc"
 	"be/internal"
@@ -29,6 +29,7 @@ type RegisterRequest struct {
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /register [post]
 func Register(c *gin.Context, app *bootstrap.App) {
 	r := RegisterRequest{}
@@ -36,6 +37,30 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	if err := c.ShouldBindJSON(&r); err != nil {
 		internal.Respond(c, 400, false, err.Error(), nil)
 		return
+	}
+
+	// if user want to register as admin
+	if sqlc.Role(r.UserRole) == sqlc.RoleAdmin || sqlc.Role(r.UserRole) == sqlc.RoleLecturer {
+		sess, exists := c.Get("session")
+
+		if !exists {
+			internal.Respond(c, 401, false, "Unauthorized", nil)
+			return
+		}
+
+		session := sess.(sqlc.Session)
+		user, err := app.DB.GetUserById(c, session.UserID)
+
+		if err != nil {
+			app.Logger.Error().Msg(err.Error())
+			internal.Respond(c, 500, false, "Internal server error", nil)
+			return
+		}
+
+		if user.UserRole != sqlc.RoleAdmin {
+			internal.Respond(c, 401, false, "Permission denied", nil)
+			return
+		}
 	}
 
 	user, err := app.DB.ValidateNewUser(c, sqlc.ValidateNewUserParams{
@@ -56,6 +81,8 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
+	app.Logger.Info().Msg(r.UserRole)
+
 	user, err = app.DB.CreateUser(c, sqlc.CreateUserParams{
 		UserID:       internal.GenerateUUID(),
 		Username:     r.Username,
@@ -74,7 +101,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	internal.Respond(c, 200, true, "User created", controller.UserInfoResponse{
+	internal.Respond(c, 200, true, "User created", users.UserInfoResponse{
 		UserID:       user.UserID,
 		Username:     user.Username,
 		UserEmail:    user.UserEmail,

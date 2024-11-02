@@ -105,8 +105,9 @@ func (ns NullDay) Value() (driver.Value, error) {
 type Role string
 
 const (
-	RoleAdmin Role = "admin"
-	RoleUser  Role = "user"
+	RoleAdmin    Role = "admin"
+	RoleUser     Role = "user"
+	RoleLecturer Role = "lecturer"
 )
 
 func (e *Role) Scan(src interface{}) error {

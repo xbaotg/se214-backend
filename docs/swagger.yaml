@@ -67,13 +67,13 @@ definitions:
         allOf:
         - $ref: '#/definitions/sqlc.Day'
         enum:
-        - Monday
-        - Tuesday
-        - Wednesday
-        - Thursday
-        - Friday
-        - Saturday
-        - Sunday
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
       course_department:
         type: string
       course_end_shift:
@@ -128,7 +128,6 @@ definitions:
     - course_start_shift
     - course_teacher_id
     - course_year
-    - current_enroll
     - max_enroll
     type: object
   model.Response:
@@ -312,6 +311,12 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/controller.RegisterRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:

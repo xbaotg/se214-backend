@@ -1,5 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-create type role as enum ('admin', 'user');
+create type role as enum ('admin', 'user', 'lecturer');
 create type day as enum ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
 create type tu_status as enum ('paid', 'unpaid');
 create type co_status as enum ('done', 'failed', 'progressing');

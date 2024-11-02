@@ -1,9 +1,8 @@
 package main
 
 import (
-	route "be/api/router"
+	"be/api/router"
 	"be/bootstrap"
-
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +12,7 @@ func main() {
 
 	// run the server
 	r := gin.Default()
-	route.SetupRoute(r, app)
-	route.SetupSwaggerRoute(r)
+	router.SetupRoute(r, app)
+	router.SetupSwaggerRoute(r)
 	r.Run(app.Config.ServerAddr)
 }

@@ -231,6 +231,14 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controller.RegisterRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -455,7 +463,6 @@ const docTemplate = `{
                 "course_start_shift",
                 "course_teacher_id",
                 "course_year",
-                "current_enroll",
                 "max_enroll"
             ],
             "properties": {
@@ -466,13 +473,13 @@ const docTemplate = `{
                 },
                 "course_day": {
                     "enum": [
-                        "Monday",
-                        "Tuesday",
-                        "Wednesday",
-                        "Thursday",
-                        "Friday",
-                        "Saturday",
-                        "Sunday"
+                        "monday",
+                        "tuesday",
+                        "wednesday",
+                        "thursday",
+                        "friday",
+                        "saturday",
+                        "sunday"
                     ],
                     "allOf": [
                         {
