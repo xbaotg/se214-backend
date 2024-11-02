@@ -72,6 +72,6 @@ type Course struct {
 	CourseRoom       string
 	CreatedAt        time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt        time.Time  `gorm:"autoUpdateTime"`
-	Teacher          User       `gorm:"foreignKey:CourseTeacherID"`
-	Department       Department `gorm:"foreignKey:DepartmentID"`
+	Teacher          User       `gorm:"foreignKey:CourseTeacherID" json:"-"`
+	Department       Department `gorm:"foreignKey:DepartmentID" json:"-"`
 }

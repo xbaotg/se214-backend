@@ -25,23 +25,6 @@ type CreateCourseRequest struct {
 	CourseRoom       string     `json:"course_room" binding:"required,min=2,max=50"`
 }
 
-type CreateCourseResponse struct {
-	ID               uuid.UUID  `json:"id"`
-	CourseTeacherID  uuid.UUID  `json:"course_teacher_id"`
-	CourseDepartment uuid.UUID  `json:"course_department"`
-	CourseName       string     `json:"course_name"`
-	CourseFullname   string     `json:"course_fullname"`
-	CourseCredit     int32      `json:"course_credit"`
-	CourseYear       int32      `json:"course_year"`
-	CourseSemester   int32      `json:"course_semester"`
-	CourseStartShift int32      `json:"course_start_shift"`
-	CourseEndShift   int32      `json:"course_end_shift"`
-	CourseDay        models.Day `json:"course_day"`
-	MaxEnroll        int32      `json:"max_enroll"`
-	CurrentEnroll    int32      `json:"current_enroll"`
-	CourseRoom       string     `json:"course_room"`
-}
-
 // Create course
 // @Summary Create course
 // @Description Create course
@@ -113,20 +96,5 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course created", CreateCourseResponse{
-		ID:               course.ID,
-		CourseTeacherID:  course.CourseTeacherID,
-		CourseDepartment: course.DepartmentID,
-		CourseName:       course.CourseName,
-		CourseFullname:   course.CourseFullname,
-		CourseCredit:     course.CourseCredit,
-		CourseYear:       course.CourseYear,
-		CourseSemester:   course.CourseSemester,
-		CourseStartShift: course.CourseStartShift,
-		CourseEndShift:   course.CourseEndShift,
-		CourseDay:        course.CourseDay,
-		MaxEnroll:        course.MaxEnroller,
-		CurrentEnroll:    course.CurrentEnroller,
-		CourseRoom:       course.CourseRoom,
-	})
+	internal.Respond(c, 200, true, "Course created", course)
 }

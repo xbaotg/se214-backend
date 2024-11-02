@@ -2,6 +2,8 @@ package courses
 
 import (
 	"be/bootstrap"
+	"be/internal"
+	"be/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,21 +12,11 @@ type ListCourseRequest struct {
 }
 
 func ListCourses(c *gin.Context, app *bootstrap.App) {
-	// sess, _ := c.Get("session")
-	// session := sess.(models.Session)
+	courses := []models.Course{}
+	if err := app.DB.Find(&courses).Error; err != nil {
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
 
-	// // request validation
-	// req := ListCourseRequest{}
-	// if err := c.ShouldBindJSON(&req); err != nil {
-	// 	internal.Respond(c, 400, false, err.Error(), nil)
-	// 	return
-	// }
-
-	// courses, err := app.ListCourses(session)
-	// if err != nil {
-	// 	internal.Respond(c, 500, false, err.Error(), nil)
-	// 	return
-	// }
-
-	// internal.Respond(c, 200, true, "List courses success", courses)
+	internal.Respond(c, 200, true, "Courses found", courses)
 }

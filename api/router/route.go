@@ -26,6 +26,11 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 		authController.Login(c, app)
 	})
 
+	// course routes
+	publicRouter.GET("/course/list", func(c *gin.Context) {
+		coursesController.ListCourses(c, app)
+	})
+
 	// department routes
 	publicRouter.GET("/department/list", func(c *gin.Context) {
 		departmentsController.ListDepartment(c, app)
@@ -58,6 +63,9 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// course routes
 	protectedRouter.POST("/course/create", func(c *gin.Context) {
 		coursesController.CreateCourse(c, app)
+	})
+	protectedRouter.DELETE("/course/delete", func(c *gin.Context) {
+		coursesController.DeleteCourse(c, app)
 	})
 
 	// department routes

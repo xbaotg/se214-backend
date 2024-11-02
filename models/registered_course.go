@@ -60,6 +60,6 @@ type RegisteredCourse struct {
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 
-	Course Course `gorm:"foreignKey:CourseID;references:ID"`
-	User   User   `gorm:"foreignKey:UserID"`
+	Course Course `gorm:"foreignKey:CourseID;references:ID" json:"-"`
+	User   User   `gorm:"foreignKey:UserID" json:"-"`
 }

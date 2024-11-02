@@ -63,5 +63,5 @@ type Tuition struct {
 	CreatedAt       time.Time `gorm:"autoCreateTime"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
 
-	User User `gorm:"foreignKey:UserID"`
+	User User `gorm:"foreignKey:UserID" json:"-"`
 }

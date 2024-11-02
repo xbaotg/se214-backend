@@ -11,6 +11,6 @@ type PrerequisiteCourse struct {
 	PrerequisiteID uuid.UUID
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	Course         Course `gorm:"foreignKey:CourseID;references:ID"`
-	Prerequisite   Course `gorm:"foreignKey:PrerequisiteID;references:ID"`
+	Course         Course `gorm:"foreignKey:CourseID;references:ID" json:"-"`
+	Prerequisite   Course `gorm:"foreignKey:PrerequisiteID;references:ID" json:"-"`
 }
