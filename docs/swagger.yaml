@@ -1,5 +1,5 @@
 definitions:
-  controller.LoginRequest:
+  auth.LoginRequest:
     properties:
       password:
         minLength: 6
@@ -10,7 +10,7 @@ definitions:
     - password
     - username
     type: object
-  controller.LoginResponse:
+  auth.LoginResponse:
     properties:
       accessToken:
         type: string
@@ -23,7 +23,7 @@ definitions:
       sessionID:
         type: string
     type: object
-  controller.RefreshTokenResponse:
+  auth.RefreshTokenResponse:
     properties:
       accessToken:
         type: string
@@ -34,7 +34,7 @@ definitions:
       refreshTokenExpiresIn:
         type: string
     type: object
-  controller.RegisterRequest:
+  auth.RegisterRequest:
     properties:
       password:
         minLength: 6
@@ -57,7 +57,7 @@ definitions:
     - username
     - year
     type: object
-  course.CreateCourseRequest:
+  courses.CreateCourseRequest:
     properties:
       course_credit:
         maximum: 12
@@ -130,6 +130,20 @@ definitions:
     - course_year
     - max_enroll
     type: object
+  departments.CreateDepartmentRequest:
+    properties:
+      department_code:
+        maxLength: 10
+        minLength: 2
+        type: string
+      department_name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - department_code
+    - department_name
+    type: object
   model.Response:
     properties:
       data: {}
@@ -156,7 +170,20 @@ definitions:
     - DayFriday
     - DaySaturday
     - DaySunday
-  user.ChangePassRequest:
+  sqlc.Department:
+    properties:
+      createdAt:
+        type: string
+      departmentCode:
+        type: string
+      departmentID:
+        type: string
+      departmentName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  users.ChangePassRequest:
     properties:
       new_password:
         minLength: 6
@@ -182,7 +209,7 @@ paths:
         name: CreateCourseRequest
         required: true
         schema:
-          $ref: '#/definitions/course.CreateCourseRequest'
+          $ref: '#/definitions/courses.CreateCourseRequest'
       - default: Bearer <Add access token here>
         description: Insert your access token
         in: header
@@ -211,6 +238,76 @@ paths:
       summary: Create course
       tags:
       - Course
+  /department/create:
+    post:
+      consumes:
+      - application/json
+      description: Create department
+      parameters:
+      - description: CreateDepartmentRequest
+        in: body
+        name: CreateDepartmentRequest
+        required: true
+        schema:
+          $ref: '#/definitions/departments.CreateDepartmentRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqlc.Department'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create department
+      tags:
+      - Department
+  /department/list:
+    get:
+      consumes:
+      - application/json
+      description: List department
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sqlc.Department'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: List department
+      tags:
+      - Department
   /login:
     post:
       consumes:
@@ -222,14 +319,14 @@ paths:
         name: LoginRequest
         required: true
         schema:
-          $ref: '#/definitions/controller.LoginRequest'
+          $ref: '#/definitions/auth.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.LoginResponse'
+            $ref: '#/definitions/auth.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -283,7 +380,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.RefreshTokenResponse'
+            $ref: '#/definitions/auth.RefreshTokenResponse'
         "400":
           description: Bad Request
           schema:
@@ -310,7 +407,7 @@ paths:
         name: RegisterRequest
         required: true
         schema:
-          $ref: '#/definitions/controller.RegisterRequest'
+          $ref: '#/definitions/auth.RegisterRequest'
       - default: Bearer <Add access token here>
         description: Insert your access token
         in: header
@@ -350,7 +447,7 @@ paths:
         name: ChangePassRequest
         required: true
         schema:
-          $ref: '#/definitions/user.ChangePassRequest'
+          $ref: '#/definitions/users.ChangePassRequest'
       produces:
       - application/json
       responses:

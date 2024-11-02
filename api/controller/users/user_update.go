@@ -19,7 +19,7 @@ type ChangePassRequest struct {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param ChangePassRequest body user.ChangePassRequest true "ChangePassRequest"
+// @Param ChangePassRequest body ChangePassRequest true "ChangePassRequest"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response

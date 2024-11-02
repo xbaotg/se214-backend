@@ -24,7 +24,7 @@ type RegisterRequest struct {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param RegisterRequest body controller.RegisterRequest true "RegisterRequest"
+// @Param RegisterRequest body RegisterRequest true "RegisterRequest"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response

@@ -14,5 +14,9 @@ func main() {
 	r := gin.Default()
 	router.SetupRoute(r, app)
 	router.SetupSwaggerRoute(r)
-	r.Run(app.Config.ServerAddr)
+
+	err := r.Run(app.Config.ServerAddr)
+	if err != nil {
+		app.Logger.Fatal().Err(err).Msg("Failed to start server")
+	}
 }

@@ -31,8 +31,8 @@ type LoginResponse struct {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param LoginRequest body controller.LoginRequest true "LoginRequest"
-// @Success 200 {object} controller.LoginResponse
+// @Param LoginRequest body LoginRequest true "LoginRequest"
+// @Success 200 {object} LoginResponse
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response

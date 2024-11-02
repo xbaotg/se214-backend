@@ -3,6 +3,7 @@ package router
 import (
 	authController "be/api/controller/auth"
 	coursesController "be/api/controller/courses"
+	departmentsController "be/api/controller/departments"
 	usersController "be/api/controller/users"
 	"be/api/middleware"
 	"be/bootstrap"
@@ -34,7 +35,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	})
 
 	// auth routes
-	protectedRouter.POST("/logout", func(c *gin.Context) {
+	protectedRouter.GET("/logout", func(c *gin.Context) {
 		authController.Logout(c, app)
 	})
 	protectedRouter.POST("/refresh-token", func(c *gin.Context) {
@@ -42,15 +43,23 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	})
 
 	// user routes
-	protectedRouter.POST("/user/info", func(c *gin.Context) {
+	protectedRouter.GET("/user/info", func(c *gin.Context) {
 		usersController.GetUserInfo(c, app)
 	})
-	protectedRouter.POST("/user/change-password", func(c *gin.Context) {
+	protectedRouter.PATCH("/user/change-password", func(c *gin.Context) {
 		usersController.ChangePassUser(c, app)
 	})
 
 	// course routes
 	protectedRouter.POST("/course/create", func(c *gin.Context) {
 		coursesController.CreateCourse(c, app)
+	})
+
+	// department routes
+	protectedRouter.POST("/department/create", func(c *gin.Context) {
+		departmentsController.CreateDepartment(c, app)
+	})
+	protectedRouter.GET("/department/list", func(c *gin.Context) {
+		departmentsController.ListDepartment(c, app)
 	})
 }

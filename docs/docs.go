@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/course.CreateCourseRequest"
+                            "$ref": "#/definitions/courses.CreateCourseRequest"
                         }
                     },
                     {
@@ -75,6 +75,111 @@ const docTemplate = `{
                 }
             }
         },
+        "/department/create": {
+            "post": {
+                "description": "Create department",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Create department",
+                "parameters": [
+                    {
+                        "description": "CreateDepartmentRequest",
+                        "name": "CreateDepartmentRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/departments.CreateDepartmentRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sqlc.Department"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/department/list": {
+            "get": {
+                "description": "List department",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Department"
+                ],
+                "summary": "List department",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sqlc.Department"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login user",
@@ -95,7 +200,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.LoginRequest"
+                            "$ref": "#/definitions/auth.LoginRequest"
                         }
                     }
                 ],
@@ -103,7 +208,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.LoginResponse"
+                            "$ref": "#/definitions/auth.LoginResponse"
                         }
                     },
                     "400": {
@@ -185,7 +290,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.RefreshTokenResponse"
+                            "$ref": "#/definitions/auth.RefreshTokenResponse"
                         }
                     },
                     "400": {
@@ -229,7 +334,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.RegisterRequest"
+                            "$ref": "#/definitions/auth.RegisterRequest"
                         }
                     },
                     {
@@ -289,7 +394,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.ChangePassRequest"
+                            "$ref": "#/definitions/users.ChangePassRequest"
                         }
                     }
                 ],
@@ -364,7 +469,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controller.LoginRequest": {
+        "auth.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -380,7 +485,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.LoginResponse": {
+        "auth.LoginResponse": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -400,7 +505,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.RefreshTokenResponse": {
+        "auth.RefreshTokenResponse": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -417,7 +522,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.RegisterRequest": {
+        "auth.RegisterRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -449,7 +554,7 @@ const docTemplate = `{
                 }
             }
         },
-        "course.CreateCourseRequest": {
+        "courses.CreateCourseRequest": {
             "type": "object",
             "required": [
                 "course_credit",
@@ -543,6 +648,25 @@ const docTemplate = `{
                 }
             }
         },
+        "departments.CreateDepartmentRequest": {
+            "type": "object",
+            "required": [
+                "department_code",
+                "department_name"
+            ],
+            "properties": {
+                "department_code": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 2
+                },
+                "department_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                }
+            }
+        },
         "model.Response": {
             "type": "object",
             "properties": {
@@ -576,7 +700,27 @@ const docTemplate = `{
                 "DaySunday"
             ]
         },
-        "user.ChangePassRequest": {
+        "sqlc.Department": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentID": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "users.ChangePassRequest": {
             "type": "object",
             "required": [
                 "new_password",

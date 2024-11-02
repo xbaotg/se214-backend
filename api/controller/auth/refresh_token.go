@@ -22,7 +22,7 @@ type RefreshTokenResponse struct {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} controller.RefreshTokenResponse
+// @Success 200 {object} RefreshTokenResponse
 // @Failure 400 {object} model.Response
 // @Failure 404 {object} model.Response
 // @Failure 500 {object} model.Response
