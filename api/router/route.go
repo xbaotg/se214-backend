@@ -5,6 +5,7 @@ import (
 	coursesController "be/api/controller/courses"
 	departmentsController "be/api/controller/departments"
 	usersController "be/api/controller/users"
+	usersCourseController "be/api/controller/users/courses_managament"
 	"be/api/middleware"
 	"be/bootstrap"
 
@@ -41,6 +42,11 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// user routes
 	protectedRouter.GET("/user/info", func(c *gin.Context) { usersController.GetUserInfo(c, app) })
 	protectedRouter.PATCH("/user/change-password", func(c *gin.Context) { usersController.ChangePassUser(c, app) })
+
+	// user - course routes
+	protectedRouter.GET("/user/course/list", func(c *gin.Context) { usersCourseController.UserListCourse(c, app) })
+	protectedRouter.POST("/user/course/register", func(c *gin.Context) { usersCourseController.UserRegisterCourse(c, app) })
+	protectedRouter.DELETE("/user/course/unregister", func(c *gin.Context) { usersCourseController.UserDeleteCourse(c, app) })
 
 	// course routes
 	protectedRouter.POST("/course/create", func(c *gin.Context) { coursesController.CreateCourse(c, app) })
