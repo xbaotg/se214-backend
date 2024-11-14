@@ -13,6 +13,11 @@ import (
 
 func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		// c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		// c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		// c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
 		// Get the refresh token from the request header
 		refreshToken := c.GetHeader("Authorization")
 		if refreshToken == "" {
