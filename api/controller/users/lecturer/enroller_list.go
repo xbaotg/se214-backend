@@ -4,6 +4,8 @@ import (
 	"be/bootstrap"
 	"be/internal"
 	"be/models"
+	usersPackage "be/api/controller/users"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -63,5 +65,17 @@ func ListCourseEnroller(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	internal.Respond(c, 200, true, "List course enroller successfully", users)
+	usersResponses := []usersPackage.UserInfoResponse{}
+	for _, user := range users {
+		usersResponses = append(usersResponses, usersPackage.UserInfoResponse{
+			UserID:       user.ID,
+			Username:     user.Username,
+			UserEmail:    user.UserEmail,
+			UserFullname: user.UserFullname,
+			UserRole:     user.UserRole,
+			Year:         user.Year,
+		})
+	}
+
+	internal.Respond(c, 200, true, "List course enroller successfully", usersResponses)
 }
