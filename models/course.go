@@ -70,6 +70,7 @@ type Course struct {
 	MaxEnroller      int32
 	CurrentEnroller  int32
 	CourseRoom       string
+	Confirmed 	  bool
 	CreatedAt        time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt        time.Time  `gorm:"autoUpdateTime"`
 	Teacher          User       `gorm:"foreignKey:CourseTeacherID" json:"-"`

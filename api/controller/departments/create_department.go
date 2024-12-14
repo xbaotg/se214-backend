@@ -29,7 +29,7 @@ func CreateDepartment(c *gin.Context, app *bootstrap.App) {
 	// validate request
 	req := CreateDepartmentRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		internal.Respond(c, 400, false, err.Error(), nil)
+		internal.Respond(c, 400, false, "Please fill all required fields", nil)
 		return
 	}
 
@@ -62,11 +62,25 @@ func CreateDepartment(c *gin.Context, app *bootstrap.App) {
 		DepartmentName: req.DepartmentName,
 		DepartmentCode: req.DepartmentCode,
 	}
+
+	if ra := app.DB.Table("departments").Where("department_code = ?", req.DepartmentCode).First(&models.Department{}); ra.RowsAffected > 0 {
+		internal.Respond(c, 403, false, "Department existed, please change department code", nil)
+		return
+	}
+
 	if err := app.DB.Create(&departmentToCreate).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Department created", departmentToCreate)
+	departmentReponse := DepartmentResponse{
+		DepartmentID:   departmentToCreate.ID.String(),
+		DepartmentName: departmentToCreate.DepartmentName,
+		DepartmentCode: departmentToCreate.DepartmentCode,
+		CreatedAt:      departmentToCreate.CreatedAt.String(),
+		UpdatedAt:      departmentToCreate.UpdatedAt.String(),
+	}
+
+	internal.Respond(c, 200, true, "Department created", departmentReponse)
 }

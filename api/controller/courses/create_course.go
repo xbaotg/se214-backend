@@ -4,12 +4,16 @@ import (
 	"be/bootstrap"
 	"be/internal"
 	"be/models"
+	"be/api/schemas"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"slices"
+	"fmt"
 )
 
 type CreateCourseRequest struct {
+	// CourseCode       string     `json:"course_code"`
 	CourseTeacherID  uuid.UUID  `json:"course_teacher_id" binding:"required"`
 	CourseDepartment uuid.UUID  `json:"course_department" binding:"required"`
 	CourseName       string     `json:"course_name" binding:"required,min=3,max=100"`
@@ -25,6 +29,7 @@ type CreateCourseRequest struct {
 	CourseRoom       string     `json:"course_room" binding:"required,min=2,max=50"`
 }
 
+
 // Create course
 // @Summary Create course
 // @Description Create course
@@ -39,12 +44,17 @@ type CreateCourseRequest struct {
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /course/create [post]
 func CreateCourse(c *gin.Context, app *bootstrap.App) {
+	if app.State != bootstrap.SETUP {
+		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		return
+	}
 	sess, _ := c.Get("session")
 	session := sess.(models.Session)
 
 	// request validation
 	req := CreateCourseRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
+		// internal.Respond(c, 400, false, "Please fill all required fields", nil)
 		internal.Respond(c, 400, false, err.Error(), nil)
 		return
 	}
@@ -69,10 +79,36 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// check user role
-	if user.UserRole != models.RoleAdmin {
+	if !slices.Contains([]models.Role{models.RoleAdmin, models.RoleLecturer}, user.UserRole) {
 		internal.Respond(c, 403, false, "Permission denied", nil)
 		return
 	}
+
+	// currentCourses := []models.Course{
+	// 	models.Course{
+	// 		CourseDay:      req.CourseDay,
+	// 		CourseYear:     req.CourseYear,
+	// 		CourseSemester: req.CourseSemester,
+	// 		CourseRoom:     req.CourseRoom,
+	// 	},
+	// }
+
+	// if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
+	// 	app.Logger.Error().Err(err).Msg(err.Error())
+	// 	internal.Respond(c, 500, false, "Internal server error", nil)
+	// 	return
+	// }
+
+	// if len(currentCourses) > 0 {
+	// 	for _, course := range currentCourses {
+	// 		for i := course.CourseStartShift; i <= course.CourseEndShift; i++ {
+	// 			if i >= req.CourseStartShift && i <= req.CourseEndShift {
+	// 				internal.Respond(c, 400, false, "Course shift is not available", nil)
+	// 				return
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	course := models.Course{
 		ID:               internal.GenerateUUID(),
@@ -86,15 +122,62 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		CourseStartShift: req.CourseStartShift,
 		CourseEndShift:   req.CourseEndShift,
 		CourseDay:        req.CourseDay,
+		Confirmed:        false,
 		MaxEnroller:      req.MaxEnroll,
 		CurrentEnroller:  req.CurrentEnroll,
 		CourseRoom:       req.CourseRoom,
 	}
+	if user.UserRole == models.RoleAdmin {
+		currentCourses := []models.Course{
+			models.Course{
+				CourseDay:      req.CourseDay,
+				CourseYear:     req.CourseYear,
+				CourseSemester: req.CourseSemester,
+				CourseRoom:     req.CourseRoom,
+			},
+		}
+
+		if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
+			app.Logger.Error().Err(err).Msg(err.Error())
+			internal.Respond(c, 500, false, "Internal server error", nil)
+			return
+		}
+
+		if len(currentCourses) > 0 {
+			for _, course := range currentCourses {
+				for i := course.CourseStartShift; i <= course.CourseEndShift; i++ {
+					if i >= req.CourseStartShift && i <= req.CourseEndShift {
+						internal.Respond(c, 400, false, "Course shift is not available", nil)
+						return
+					}
+				}
+			}
+		}
+		course.Confirmed = true
+	}
+
 	if err := app.DB.Create(&course).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course created", course)
+	courseResponse := schemas.CreateCourseResponse{
+		ID:               course.ID,
+		CourseTeacherID:  course.CourseTeacherID,
+		CourseDepartment: course.DepartmentID,
+		CourseName:       course.CourseName,
+		CourseFullname:   course.CourseFullname,
+		CourseCredit:     course.CourseCredit,
+		CourseYear:       course.CourseYear,
+		CourseSemester:   course.CourseSemester,
+		CourseStartShift: course.CourseStartShift,
+		CourseEndShift:   course.CourseEndShift,
+		CourseDay:        course.CourseDay,
+		MaxEnroll:        course.MaxEnroller,
+		CurrentEnroll:    course.CurrentEnroller,
+		CourseRoom:       course.CourseRoom,
+	}
+
+	internal.Respond(c, 200, true, "Course created", courseResponse)
 }

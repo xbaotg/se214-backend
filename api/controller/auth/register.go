@@ -68,7 +68,10 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	// 	Username:  r.Username,
 	// 	UserEmail: r.UserEmail,
 	// })
-	if affectedRow := app.DB.Where(models.User{Username: r.Username}).Or(models.User{UserEmail: r.UserEmail}).Find(models.User{}).RowsAffected; affectedRow > 0 {
+
+	var temp []models.User
+
+	if affectedRow := app.DB.Where(models.User{Username: r.Username}).Or(models.User{UserEmail: r.UserEmail}).Find(&temp).RowsAffected; affectedRow > 0 {
 		internal.Respond(c, 403, false, "User existed", nil)
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"be/internal"
 	"be/models"
 	"reflect"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -40,6 +41,11 @@ type EditCourseRequest struct {
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /course/edit [put]
 func EditCourse(c *gin.Context, app *bootstrap.App) {
+	if app.State != bootstrap.SETUP {
+		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		return
+	}
+
 	// validate request
 	req := EditCourseRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -71,6 +77,32 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 	if err := app.DB.First(&course, req.ID).Error; err != nil {
 		internal.Respond(c, 500, false, "Internal server error", nil)
 		return
+	}
+
+	currentCourses := []models.Course{
+		models.Course{
+			CourseDay:      req.CourseDay,
+			CourseYear:     req.CourseYear,
+			CourseSemester: req.CourseSemester,
+			CourseRoom:     req.CourseRoom,
+		},
+	}
+
+	if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
+
+	if len(currentCourses) > 0 {
+		for _, courseLoop := range currentCourses {
+			for i := courseLoop.CourseStartShift; i <= courseLoop.CourseEndShift; i++ {
+				if i >= req.CourseStartShift && i <= req.CourseEndShift && req.ID != courseLoop.ID {
+					internal.Respond(c, 400, false, "Course shift is not available", nil)
+					return
+				}
+			}
+		}
 	}
 
 	reqValue := reflect.ValueOf(req)

@@ -12,16 +12,18 @@ definitions:
     type: object
   auth.LoginResponse:
     properties:
-      accessToken:
+      access_token:
         type: string
-      accessTokenExpiresIn:
+      access_token_expires_in:
         type: string
-      refreshToken:
+      refresh_token:
         type: string
-      refreshTokenExpiresIn:
+      refresh_token_expires_in:
         type: string
-      sessionID:
+      session_id:
         type: string
+      user_role:
+        $ref: '#/definitions/models.Role'
     type: object
   auth.RefreshTokenResponse:
     properties:
@@ -103,6 +105,7 @@ definitions:
         minimum: 1
         type: integer
       course_teacher_id:
+        description: CourseCode       string     `json:"course_code"`
         type: string
       course_year:
         maximum: 2100
@@ -163,6 +166,38 @@ definitions:
     required:
     - course_id
     type: object
+  coursesmanagament.GetCreditRequest:
+    properties:
+      semester:
+        type: integer
+      year:
+        type: integer
+    required:
+    - semester
+    - year
+    type: object
+  coursesmanagament.UserRegisterCourseRequest:
+    properties:
+      course_id:
+        type: string
+      course_semester:
+        type: integer
+      course_year:
+        type: integer
+    required:
+    - course_id
+    type: object
+  coursesmanagament.UserUnRegisterCourseRequest:
+    properties:
+      course_id:
+        type: string
+      course_semester:
+        type: integer
+      course_year:
+        type: integer
+    required:
+    - course_id
+    type: object
   departments.CreateDepartmentRequest:
     properties:
       department_code:
@@ -176,6 +211,29 @@ definitions:
     required:
     - department_code
     - department_name
+    type: object
+  departments.UpdateDepartmentRequest:
+    properties:
+      department_code:
+        type: string
+      department_id:
+        type: string
+      department_name:
+        type: string
+    required:
+    - department_code
+    - department_id
+    - department_name
+    type: object
+  global.SetTuitionTypeRequest:
+    properties:
+      cost:
+        type: integer
+      type:
+        type: string
+    required:
+    - cost
+    - type
     type: object
   models.Day:
     enum:
@@ -216,6 +274,83 @@ definitions:
       status:
         type: boolean
     type: object
+  models.Role:
+    enum:
+    - admin
+    - user
+    - lecturer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleUser
+    - RoleLecturer
+  schemas.CreateCourseResponse:
+    properties:
+      course_credit:
+        type: integer
+      course_day:
+        $ref: '#/definitions/models.Day'
+      course_department:
+        type: string
+      course_end_shift:
+        type: integer
+      course_fullname:
+        type: string
+      course_name:
+        type: string
+      course_room:
+        type: string
+      course_semester:
+        type: integer
+      course_start_shift:
+        type: integer
+      course_teacher_id:
+        type: string
+      course_teacher_name:
+        type: string
+      course_year:
+        type: integer
+      current_enroll:
+        type: integer
+      id:
+        type: string
+      max_enroll:
+        type: integer
+    type: object
+  tuition.CalTuitionRequest:
+    properties:
+      semester:
+        type: integer
+      year:
+        type: integer
+    required:
+    - semester
+    - year
+    type: object
+  tuition.CreateTuitionRequest:
+    properties:
+      deadline:
+        type: string
+      semester:
+        type: integer
+      year:
+        type: integer
+    required:
+    - deadline
+    - semester
+    - year
+    type: object
+  tuition.PayTuitionRequest:
+    properties:
+      pay:
+        type: integer
+      semester:
+        type: integer
+      tuition_id:
+        type: string
+      year:
+        type: integer
+    type: object
   users.ChangePassRequest:
     properties:
       new_password:
@@ -228,9 +363,61 @@ definitions:
     - new_password
     - old_password
     type: object
+  users.UpdateUserRequest:
+    properties:
+      id:
+        type: string
+      user_fullname:
+        type: string
+      user_role:
+        $ref: '#/definitions/models.Role'
+      year:
+        type: integer
+    required:
+    - id
+    type: object
 info:
   contact: {}
 paths:
+  /course/confirm:
+    put:
+      consumes:
+      - application/json
+      description: Confirm course
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Confirm Course
+      tags:
+      - Courses
   /course/create:
     post:
       consumes:
@@ -355,6 +542,36 @@ paths:
       summary: Edit course
       tags:
       - Course
+  /course/list:
+    get:
+      consumes:
+      - application/json
+      description: List all courses
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateCourseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List Courses
+      tags:
+      - Courses
   /department/create:
     post:
       consumes:
@@ -425,6 +642,241 @@ paths:
       summary: List department
       tags:
       - Department
+  /department/update:
+    put:
+      consumes:
+      - application/json
+      description: Update department
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: UpdateDepartmentRequest
+        in: body
+        name: UpdateDepartmentRequest
+        required: true
+        schema:
+          $ref: '#/definitions/departments.UpdateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Update department
+      tags:
+      - Department
+  /global/state:
+    post:
+      description: Set global state
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: State
+        enum:
+        - freeze
+        - active
+        - setup
+        - done
+        in: query
+        name: state
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Set global state
+      tags:
+      - Global
+  /global/tuition_type:
+    get:
+      description: Get tuition type
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get tuition type
+      tags:
+      - Global
+    post:
+      description: Set tuition type
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: SetTuitionTypeRequest
+        in: body
+        name: SetTuitionTypeRequest
+        required: true
+        schema:
+          $ref: '#/definitions/global.SetTuitionTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Set tuition type
+      tags:
+      - Global
+  /lecturer/course/enroller/list:
+    get:
+      description: List course enroller
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List course enroller
+      tags:
+      - Lecturer
+  /lecturer/course/list:
+    get:
+      description: List lecturer courses
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List lecturer courses
+      tags:
+      - Lecturer
+  /lecturer/course/register/list:
+    get:
+      description: List lecturer register courses
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List lecturer register courses
+      tags:
+      - Lecturer
   /login:
     post:
       consumes:
@@ -553,6 +1005,180 @@ paths:
       summary: Register user
       tags:
       - Auth
+  /state:
+    get:
+      description: Get the state of the app
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get the state of the app
+      tags:
+      - Global
+  /tuition/cal_tuition:
+    post:
+      consumes:
+      - application/json
+      description: Calculate tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: CalTuitionRequest
+        in: body
+        name: CalTuitionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/tuition.CalTuitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Calculate tuition
+      tags:
+      - Tuition
+  /tuition/create_tuition:
+    post:
+      consumes:
+      - application/json
+      description: Create tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: CreateTuitionRequest
+        in: body
+        name: CreateTuitionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/tuition.CreateTuitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create tuition
+      tags:
+      - Tuition
+  /tuition/list:
+    get:
+      consumes:
+      - application/json
+      description: List tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List tuition
+      tags:
+      - Tuition
+  /tuition/pay:
+    post:
+      consumes:
+      - application/json
+      description: Pay tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: PayTuitionRequest
+        in: body
+        name: PayTuitionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/tuition.PayTuitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Pay tuition
+      tags:
+      - Tuition
   /user/change-pass:
     post:
       consumes:
@@ -587,10 +1213,207 @@ paths:
       summary: Change password
       tags:
       - User
-  /user/info:
+  /user/course/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete course
+      parameters:
+      - description: Course ID
+        in: path
+        name: course_id
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete course
+      tags:
+      - User
+  /user/course/list:
+    get:
+      consumes:
+      - application/json
+      description: User list course
+      parameters:
+      - description: Course year
+        in: query
+        name: course_year
+        required: true
+        type: integer
+      - description: Course semester
+        in: query
+        name: course_semester
+        required: true
+        type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: User list course
+      tags:
+      - User
+  /user/course/register:
     post:
       consumes:
       - application/json
+      description: User register course
+      parameters:
+      - description: UserRegisterCourseRequest
+        in: body
+        name: UserRegisterCourseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/coursesmanagament.UserRegisterCourseRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: User register course
+      tags:
+      - User
+  /user/course/unregister:
+    post:
+      consumes:
+      - application/json
+      description: User unregister course
+      parameters:
+      - description: UserUnRegisterCourseRequest
+        in: body
+        name: UserUnRegisterCourseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/coursesmanagament.UserUnRegisterCourseRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: User unregister course
+      tags:
+      - User
+  /user/credit:
+    post:
+      consumes:
+      - application/json
+      description: Get credit
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: GetCreditRequest
+        in: body
+        name: GetCreditRequest
+        required: true
+        schema:
+          $ref: '#/definitions/coursesmanagament.GetCreditRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get credit
+      tags:
+      - User
+  /user/info:
+    get:
       description: Get user info
       produces:
       - application/json
@@ -612,6 +1435,85 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Get user info
+      tags:
+      - User
+  /user/list:
+    get:
+      description: List users
+      parameters:
+      - description: Role
+        enum:
+        - admin
+        - user
+        - lecturer
+        - all
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List users
+      tags:
+      - User
+  /user/update:
+    post:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: UpdateUserRequest
+        in: body
+        name: UpdateUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/users.UpdateUserRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Update user
       tags:
       - User
 swagger: "2.0"

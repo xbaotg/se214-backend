@@ -16,6 +16,10 @@ type Config struct {
 	JWTSecret        string `mapstructure:"JWT_SECRET"`
 	JWTExpire        int    `mapstructure:"JWT_EXPIRE"`
 	JWTRefreshExpire int    `mapstructure:"JWT_REFRESH_EXPIRE"`
+	AppInitialState  string `mapstructure:"APP_INITIAL_STATE"`
+
+	TuitionType string `mapstructure:"TUITION_TYPE"`
+	TuitionCost int    `mapstructure:"TUITION_COST"`
 }
 
 func NewConfig() *Config {
@@ -32,6 +36,7 @@ func NewConfig() *Config {
 	if err := viper.Unmarshal(&conf); err != nil {
 		log.Fatalln(err)
 	}
+
 
 	return &conf
 }

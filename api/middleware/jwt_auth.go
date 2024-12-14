@@ -30,7 +30,10 @@ func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 		}
 
 		// Verify the refresh token
-		refreshToken = refreshToken[len("Bearer "):]
+		prefix := "Bearer "
+		if len(refreshToken) > len(prefix) && refreshToken[:len(prefix)] == prefix {
+			refreshToken = refreshToken[len(prefix):]
+		}
 		refreshPayload, err := app.TokenMaker.VerifyToken(refreshToken)
 		if err != nil {
 			app.Logger.Error().Msg(err.Error())

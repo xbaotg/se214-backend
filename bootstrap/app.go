@@ -7,11 +7,22 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
+)
+
+type State string
+
+const (
+	FREEZE State = "freeze"
+	ACTIVE State = "active"
+	DONE State = "done"
+	SETUP State = "setup"
 )
 
 type App struct {
 	Config     *Config
+	State	State
 	DB         *gorm.DB
 	Logger     zerolog.Logger
 	TokenMaker internal.Maker
@@ -36,6 +47,9 @@ func NewApp() *App {
 		os.Exit(1)
 	}
 	app.TokenMaker = tokenMaker
+
+	app.State = State(app.Config.AppInitialState)
+	viper.Set("APP_INITIAL_STATE", app.State)
 
 	return &app
 }
