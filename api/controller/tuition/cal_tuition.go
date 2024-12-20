@@ -39,7 +39,7 @@ func CalTuition(c *gin.Context, app *bootstrap.App) {
 	// }
 	var req CalTuitionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		internal.Respond(c, 400, false, "Invalid request", nil)
+		internal.Respond(c, 400, false, "Hãy điền đầy đủ thông tin", nil)
 		return
 	}
 
@@ -48,7 +48,7 @@ func CalTuition(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -60,13 +60,13 @@ func CalTuition(c *gin.Context, app *bootstrap.App) {
 		user.ID, req.Year, req.Semester).Find(&courses).Error; err != nil {
 		
 
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}	
 
 	coursesResponse := []schemas.CreateCourseResponse{}
 	if len(courses) == 0 {
-		internal.Respond(c, 200, true, "User has not registered any course", gin.H{"tuition": -1})
+		internal.Respond(c, 200, true, "Người dùng chưa đăng ký môn học nào", gin.H{"tuition": -1})
 		return
 	} else {
 		for _, course := range courses {

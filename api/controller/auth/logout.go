@@ -24,7 +24,7 @@ func Logout(c *gin.Context, app *bootstrap.App) {
 
 	if !exists {
 		app.Logger.Error().Msg("Session not found")
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -34,9 +34,9 @@ func Logout(c *gin.Context, app *bootstrap.App) {
 	// revoke refresh token
 	if err := app.DB.Model(&session).Updates(models.Session{IsActive: false}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Logout success", nil)
+	internal.Respond(c, 200, true, "Đăng xuất thành công", nil)
 }

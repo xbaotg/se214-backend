@@ -30,7 +30,7 @@ func ListDepartment(c *gin.Context, app *bootstrap.App) {
 	departments := []models.Department{}
 	if err := app.DB.Find(&departments).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -47,5 +47,5 @@ func ListDepartment(c *gin.Context, app *bootstrap.App) {
 		})
 	}
 
-	internal.Respond(c, 200, true, "List department success", departmentResponses)
+	internal.Respond(c, 200, true, "Lấy danh sách khoa thành công", departmentResponses)
 }

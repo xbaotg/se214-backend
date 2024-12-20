@@ -34,7 +34,7 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if req.OldPassword == req.NewPassword {
-		internal.Respond(c, 400, false, "New password must be different from old password", nil)
+		internal.Respond(c, 400, false, "Mật khẩu mới không được trùng với mật khẩu cũ", nil)
 		return
 	}
 
@@ -44,12 +44,12 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if internal.CheckPassword(req.OldPassword, user.Password) != nil {
-		internal.Respond(c, 400, false, "Old password is incorrect", nil)
+		internal.Respond(c, 400, false, "Mật khẩu cũ không đúng", nil)
 		return
 	}
 
@@ -57,15 +57,15 @@ func ChangePassUser(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if err := app.DB.Model(&user).Updates(models.User{Password: hashedPassword}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Change password success", nil)
+	internal.Respond(c, 200, true, "Đổi mật khẩu thành công", nil)
 }

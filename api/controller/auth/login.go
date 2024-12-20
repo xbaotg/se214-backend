@@ -51,16 +51,16 @@ func Login(c *gin.Context, app *bootstrap.App) {
 	user := models.User{}
 	if err := app.DB.First(&user, "username = ?", req.Username).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "User not found", nil)
+			internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	if internal.CheckPassword(req.Password, user.Password) != nil {
-		internal.Respond(c, 400, false, "Invalid password", nil)
+		internal.Respond(c, 400, false, "Sai mật khẩu", nil)
 		return
 	}
 
@@ -69,7 +69,7 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -81,7 +81,7 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -97,11 +97,11 @@ func Login(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Create(&session).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, http.StatusOK, true, "Login success", LoginResponse{
+	internal.Respond(c, http.StatusOK, true, "Đăng nhập thành công", LoginResponse{
 		SessionID:             session.ID,
 		AccessToken:           accessToken,
 		UserRole:              user.UserRole,

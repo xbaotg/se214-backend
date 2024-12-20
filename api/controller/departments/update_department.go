@@ -41,12 +41,12 @@ func UpdateDepartment(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 	// check if user is admin
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Forbidden", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -55,13 +55,13 @@ func UpdateDepartment(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if err := app.DB.First(&department, req.DepartmentID).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if department.DepartmentCode != req.DepartmentCode {
 		if ra := app.DB.Table("departments").Where("department_code = ?", req.DepartmentCode).First(&models.Department{}); ra.RowsAffected > 0 {
-			internal.Respond(c, 403, false, "Department existed, please change department code", nil)
+			internal.Respond(c, 403, false, "Khoa đã tồn tại, vui lòng kiểm tra lại", nil)
 			return
 		}
 	}
@@ -77,9 +77,9 @@ func UpdateDepartment(c *gin.Context, app *bootstrap.App) {
 		return nil		
 	}); err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Update department success", nil)
+	internal.Respond(c, 200, true, "Cập nhật khoa thành công", nil)
 }

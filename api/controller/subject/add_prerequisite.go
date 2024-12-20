@@ -41,39 +41,39 @@ func AddPrerequisite(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Forbidden", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
 	if req.CourseID == req.PrerequisiteID {
-		internal.Respond(c, 400, false, "Course and Prerequisite cannot be the same", nil)
+		internal.Respond(c, 400, false, "Môn học không thể tự thêm môn tiên quyết cho chính nó", nil)
 		return
 	}
 
 	course := models.AllCourses{CourseName: req.CourseID}
 	if err := app.DB.First(&course).Error; err != nil {
-		internal.Respond(c, 404, false, "Course not found", nil)
+		internal.Respond(c, 404, false, "Môn học không tồn tại", nil)
 		return
 	}
 
 	if !course.Status {
-		internal.Respond(c, 400, false, "Course is not active", nil)
+		internal.Respond(c, 400, false, "Môn học không hoạt động", nil)
 		return
 	} 
 
 	prerequisite := models.AllCourses{CourseName: req.PrerequisiteID}
 	if err := app.DB.First(&prerequisite).Error; err != nil {
-		internal.Respond(c, 404, false, "Prerequisite not found", nil)
+		internal.Respond(c, 404, false, "Không tìm thấy môn học tiên quyết", nil)
 		return
 	}
 
 	if !prerequisite.Status {
-		internal.Respond(c, 400, false, "Prerequisite is not active", nil)
+		internal.Respond(c, 400, false, "Không thể thêm môn học tiên quyết không hoạt động", nil)
 		return
 	}
 
@@ -85,12 +85,12 @@ func AddPrerequisite(c *gin.Context, app *bootstrap.App) {
 	if res := app.DB.Create(&prerequisiteCourse); res.Error != nil {
 		app.Logger.Info().Msgf("%d", res.RowsAffected)
 		if res.RowsAffected == 0 {
-			internal.Respond(c, 400, false, "Prerequisite already added", nil)
+			internal.Respond(c, 400, false, "Môn học tiên quyết đã tồn tại", nil)
 			return
 		}
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 	
-	internal.Respond(c, 200, true, "Courses found", prerequisiteCourse)
+	internal.Respond(c, 200, true, "Thêm môn học tiên quyết thành công", prerequisiteCourse)
 }

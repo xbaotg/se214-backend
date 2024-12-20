@@ -48,12 +48,12 @@ func ListUsers(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole == models.RoleLecturer {
-		internal.Respond(c, 200, true, "List users successfully", []ListUsersResponse{
+		internal.Respond(c, 200, true, "Danh sách người dùng", []ListUsersResponse{
 			ListUsersResponse{
 				UserID:       user.ID.String(),
 				Username:     user.Username,
@@ -67,7 +67,7 @@ func ListUsers(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Forbidden", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -75,23 +75,23 @@ func ListUsers(c *gin.Context, app *bootstrap.App) {
 	if role == "" {
 		if err := app.DB.Find(&users).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				internal.Respond(c, 404, false, "No users found", nil)
+				internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 				return
 			}
 
 			app.Logger.Error().Err(err).Msg(err.Error())
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 	} else {
 		if err := app.DB.Where("user_role = ?", models.Role(role)).Find(&users).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				internal.Respond(c, 404, false, "No users found", nil)
+				internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 				return
 			}
 
 			app.Logger.Error().Err(err).Msg(err.Error())
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 	}
@@ -108,5 +108,5 @@ func ListUsers(c *gin.Context, app *bootstrap.App) {
 		})
 	}
 
-	internal.Respond(c, 200, true, "List users successfully", res)
+	internal.Respond(c, 200, true, "Danh sách người dùng", res)
 }

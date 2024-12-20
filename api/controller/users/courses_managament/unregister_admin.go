@@ -33,7 +33,7 @@ type UserUnRegisterAdminCourseRequest struct {
 // @Router /user/course/unregister_admin [post]
 func UserUnRegisterAdminCourse(c *gin.Context, app *bootstrap.App) {
 	// if app.State != bootstrap.ACTIVE {
-	// 	internal.Respond(c, 403, false, fmt.Sprintf("Server is not in active state, current state is %s", app.State), nil)
+	// 	internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái ACTIVE, trạng thái hiện tại là %s", app.State), nil)
 	// 	return
 	// }
 	// validate request
@@ -50,12 +50,12 @@ func UserUnRegisterAdminCourse(c *gin.Context, app *bootstrap.App) {
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Forbidden", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -63,17 +63,17 @@ func UserUnRegisterAdminCourse(c *gin.Context, app *bootstrap.App) {
 	course := models.Course{ID: req.CourseID}
 	if err := app.DB.First(&course).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "Course not found", nil)
+			internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	if err := app.DB.Where("id = ?", req.UserID).First(&models.User{}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	// check if user has already registered the course
@@ -91,7 +91,7 @@ func UserUnRegisterAdminCourse(c *gin.Context, app *bootstrap.App) {
 	if err := app.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where(&registeredCourse).First(&registeredCourse).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				internal.Respond(c, 404, false, "Course not found", nil)
+				internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 				return err
 			}
 
@@ -113,9 +113,9 @@ func UserUnRegisterAdminCourse(c *gin.Context, app *bootstrap.App) {
 
 		return nil
 	}); err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course unregistered", nil)
+	internal.Respond(c, 200, true, "Hủy đăng ký khóa học thành công", nil)
 }

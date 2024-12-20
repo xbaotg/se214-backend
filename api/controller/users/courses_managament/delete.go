@@ -37,14 +37,14 @@ func UserDeleteCourse(c *gin.Context, app *bootstrap.App) {
 	// 	return
 	// }
 	if app.State != bootstrap.ACTIVE {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in active state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái ACTIVE, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 
 	courseID_ := c.Param("course_id")
 	courseID, err := uuid.Parse(courseID_)
 	if err != nil {
-		internal.Respond(c, 400, false, "Invalid course ID", nil)
+		internal.Respond(c, 400, false, "Mã khóa học không hợp lệ", nil)
 		return
 	}
 
@@ -55,7 +55,7 @@ func UserDeleteCourse(c *gin.Context, app *bootstrap.App) {
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -63,32 +63,32 @@ func UserDeleteCourse(c *gin.Context, app *bootstrap.App) {
 	course := models.Course{ID: courseID}
 	if err := app.DB.First(&course).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "Course not found", nil)
+			internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	// check if user registered the course
 	registeredCourse := models.RegisteredCourse{UserID: user.ID, CourseID: course.ID}
 	if err := app.DB.First(&registeredCourse).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "User has not registered the course", nil)
+			internal.Respond(c, 404, false, "Người dùng chưa đăng ký khóa học này", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	// delete the course
 	if err := app.DB.Delete(&registeredCourse).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course deleted successfully", nil)
+	internal.Respond(c, 200, true, "Xóa khóa học thành công", nil)
 }

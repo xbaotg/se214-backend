@@ -61,17 +61,17 @@ func SetGlobalState(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
 
 	app.State = bootstrap.State(state)
 	UpdateEnvFile("APP_INITIAL_STATE", string(app.State))
-	internal.Respond(c, 200, true, "State changed", nil)
+	internal.Respond(c, 200, true, "Cập nhật trạng thái thành công", nil)
 }

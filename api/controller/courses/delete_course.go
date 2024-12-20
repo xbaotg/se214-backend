@@ -35,14 +35,14 @@ func DeleteCourse(c *gin.Context, app *bootstrap.App) {
 	// 	return
 	// }
 	if app.State != bootstrap.SETUP {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái SETUP, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 
 	courseID_ := c.Param("course_id")
 	courseID, err := uuid.Parse(courseID_)
 	if err != nil {
-		internal.Respond(c, 400, false, "Invalid course ID", nil)
+		internal.Respond(c, 400, false, "Mã khóa học không hợp lệ", nil)
 		return
 	}
 
@@ -58,18 +58,18 @@ func DeleteCourse(c *gin.Context, app *bootstrap.App) {
 
 	course := models.Course{ID: courseID}
 	if err := app.DB.First(&course).Error; err != nil {
-		internal.Respond(c, 404, false, "Course not found", nil)
+		internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 		return
 	}
 
 	if user.UserRole == models.RoleLecturer {
 		if course.CourseTeacherID != user.ID {
-			internal.Respond(c, 403, false, "Permission denied", nil)
+			internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 			return
 		}
 
 	} else if user.UserRole == models.RoleUser {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	} 
 
@@ -79,10 +79,10 @@ func DeleteCourse(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	internal.Respond(c, 200, true, "Delete course success", nil)
+	internal.Respond(c, 200, true, "Xóa khóa học thành công", nil)
 	// check if user is admin
 	// if user.UserRole != models.RoleAdmin {
-	// 	internal.Respond(c, 403, false, "Permission denied", nil)
+	// 	internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 	// 	return
 	// }
 
@@ -90,7 +90,7 @@ func DeleteCourse(c *gin.Context, app *bootstrap.App) {
 
 	// // check if course exists
 	// if err := app.DB.First(&course).Error; err != nil {
-	// 	internal.Respond(c, 404, false, "Course not found", nil)
+	// 	internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 	// 	return
 	// }
 

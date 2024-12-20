@@ -39,12 +39,12 @@ func PayTuition(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -55,7 +55,7 @@ func PayTuition(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if app.State != bootstrap.DONE {
-		internal.Respond(c, 403, false, "Cannot pay tuition in this state", nil)
+		internal.Respond(c, 403, false, "Chỉ có thể dùng chức năng này khi máy chủ ở trạng thái DONE", nil)
 		return
 	}
 
@@ -66,12 +66,12 @@ func PayTuition(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if err := app.DB.Where(&tuition).First(&tuition).Error; err != nil {
-		internal.Respond(c, 400, false, "Tuition not found", nil)
+		internal.Respond(c, 400, false, "Không tìm thấy học phí", nil)
 		return
 	}
 
 	if tuition.TuitionStatus == models.TuStatusPaid {
-		internal.Respond(c, 400, false, "Tuition already paid", nil)
+		internal.Respond(c, 400, false, "Học phí đã được thanh toán", nil)
 		return
 	}
 
@@ -85,11 +85,11 @@ func PayTuition(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if err := app.DB.Save(&tuition).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Tuition paid", gin.H{
+	internal.Respond(c, 200, true, "Thanh toán học phí thành công", gin.H{
 		"tuition": tuition,
 		"remaining": remaining,
 	})

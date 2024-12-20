@@ -30,7 +30,7 @@ type SubjectCreateRequest struct {
 // @Router /subject/create [post]
 func CreateSubject(c *gin.Context, app *bootstrap.App) {
 	// if app.State != bootstrap.SETUP {
-	// 	internal.Respond(c, 403, false, fmt.Sprintf("Server is not in SETUP state, current state is %s", app.State), nil)
+	// 	internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái SETUP, trạng thái hiện tại là %s", app.State), nil)
 	// 	return
 	// }
 	// validate request
@@ -46,12 +46,12 @@ func CreateSubject(c *gin.Context, app *bootstrap.App) {
 
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 404, false, "User not found", nil)
+		internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -62,24 +62,24 @@ func CreateSubject(c *gin.Context, app *bootstrap.App) {
 			app.Logger.Info().Msg("Course already exists")
 			if err := app.DB.Table("all_courses").Where(course).Update("status", true).Error; err != nil {
 				app.Logger.Error().Err(err).Msg(err.Error())
-				internal.Respond(c, 500, false, "Internal server error", nil)
+				internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 				return
 			}
 
 			if req.CourseFullname != "" {
 				if err := app.DB.Table("all_courses").Where(course).Update("course_fullname", req.CourseFullname).Error; err != nil {
 					app.Logger.Error().Err(err).Msg(err.Error())
-					internal.Respond(c, 500, false, "Internal server error", nil)
+					internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 					return
 				}
 			}
-			internal.Respond(c, 200, true, "Course updated successfully", course)
+			internal.Respond(c, 200, true, "Môn học đã tồn tại", course)
 		}
 		app.Logger.Error().Err(res.Error).Msg(res.Error.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course created successfully", course)
+	internal.Respond(c, 200, true, "Tạo môn học thành công", course)
 }
 

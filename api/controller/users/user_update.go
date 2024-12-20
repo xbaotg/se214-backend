@@ -44,19 +44,19 @@ func UpdateUser(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Forbidden", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
 	updateUser := models.User{ID: req.UserID}
 
 	if err := app.DB.First(&updateUser).Error; err != nil {
-		internal.Respond(c, 404, false, "User not found", nil)
+		internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 		return
 	}
 
@@ -66,9 +66,9 @@ func UpdateUser(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Save(&updateUser).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Update user successfully", nil)
+	internal.Respond(c, 200, true, "Cập nhật người dùng thành công", nil)
 }

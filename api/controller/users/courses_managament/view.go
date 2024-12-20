@@ -46,7 +46,7 @@ func UserListCourse(c *gin.Context, app *bootstrap.App) {
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -54,12 +54,12 @@ func UserListCourse(c *gin.Context, app *bootstrap.App) {
 	registeredCourses := []models.RegisteredCourse{}
 	if err := app.DB.Where("user_id = ? AND course_year = ? AND course_semester = ?", user.ID, courseYear, courseSemester).Find(&registeredCourses).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "No courses found", nil)
+			internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	// map registered courses to courses
@@ -68,14 +68,14 @@ func UserListCourse(c *gin.Context, app *bootstrap.App) {
 		course := models.Course{}
 		if err := app.DB.First(&course, "id = ? and confirmed=?", registeredCourse.CourseID, true).Error; err != nil {
 			app.Logger.Error().Err(err).Msg(err.Error())
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 
 		teacher := models.User{}
 		if err := app.DB.First(&teacher, "id = ?", course.CourseTeacherID).Error; err != nil {
 			app.Logger.Error().Err(err).Msg(err.Error())
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 
@@ -98,5 +98,5 @@ func UserListCourse(c *gin.Context, app *bootstrap.App) {
 		})
 	}
 
-	internal.Respond(c, 200, true, "Courses found", courses)
+	internal.Respond(c, 200, true, "Danh sách khóa học", courses)
 }

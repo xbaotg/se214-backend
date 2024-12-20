@@ -33,14 +33,14 @@ func ListPrerequisite(c *gin.Context, app *bootstrap.App) {
 
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 404, false, "User not found", nil)
+		internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 		return
 	}
 
 	courseName := c.Query("course_name")
 
 	// if user.UserRole != models.RoleAdmin {
-	// 	internal.Respond(c, 403, false, "Permission denied", nil)
+	// 	internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 	// 	return
 	// }
 
@@ -51,10 +51,10 @@ func ListPrerequisite(c *gin.Context, app *bootstrap.App) {
 				"prerequisite_courses.prerequisite_id, all_courses.course_fullname").Scan(&results).Error; err != nil {
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Subjects fetched successfully", results)
+	internal.Respond(c, 200, true, "Danh sách môn học tiên quyết", results)
 }
 

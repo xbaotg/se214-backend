@@ -29,24 +29,24 @@ func ListTuition(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	var tuitions []models.Tuition
 	if user.UserRole == models.RoleAdmin {
 		if err := app.DB.Find(&tuitions).Error; err != nil {
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
-		internal.Respond(c, 200, true, "Tuition list", tuitions)
+		internal.Respond(c, 200, true, "Danh sách học phí", tuitions)
 		return
 	} else {
 		if err := app.DB.Where("user_id = ?", user.ID).Find(&tuitions).Error; err != nil {
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
-		internal.Respond(c, 200, true, "Tuition list", tuitions)
+		internal.Respond(c, 200, true, "Danhs sách học phí", tuitions)
 		return
 	}
 }

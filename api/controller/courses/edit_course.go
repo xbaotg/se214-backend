@@ -42,7 +42,7 @@ type EditCourseRequest struct {
 // @Router /course/edit [put]
 func EditCourse(c *gin.Context, app *bootstrap.App) {
 	if app.State != bootstrap.SETUP {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái SETUP, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 
@@ -60,13 +60,13 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	// check if user is admin
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -75,7 +75,7 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 		ID: req.ID,
 	}
 	if err := app.DB.First(&course, req.ID).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -83,7 +83,7 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 	courseName := models.AllCourses{CourseName: req.CourseName, Status: true}
 	if err := app.DB.Table("all_courses").Where(courseName).FirstOrCreate(&courseName).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -98,7 +98,7 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -106,7 +106,7 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 		for _, courseLoop := range currentCourses {
 			for i := courseLoop.CourseStartShift; i <= courseLoop.CourseEndShift; i++ {
 				if i >= req.CourseStartShift && i <= req.CourseEndShift && req.ID != courseLoop.ID {
-					internal.Respond(c, 400, false, "Course shift is not available", nil)
+					internal.Respond(c, 400, false, "Ca học bị trùng", nil)
 					return
 				}
 			}
@@ -132,9 +132,9 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 
 	// update course
 	if err := app.DB.Save(&course).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course updated", course)
+	internal.Respond(c, 200, true, "Cập nhật khóa học thành công", nil)
 }

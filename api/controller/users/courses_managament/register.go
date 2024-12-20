@@ -20,8 +20,8 @@ type UserRegisterCourseRequest struct {
 }
 
 var (
-	ErrAlreadyRegistered = errors.New("Already registered")
-	ErrCourseFull        = errors.New("Course is full")
+	ErrAlreadyRegistered = errors.New("Đã đăng ký khóa học")
+	ErrCourseFull        = errors.New("Khóa học đã đủ số lượng học viên")
 )
 
 // courseid chan string to lock user register course
@@ -43,7 +43,7 @@ var lockMutex sync.RWMutex
 // @Router /user/course/register [post]
 func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 	if app.State != bootstrap.ACTIVE {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in active state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái ACTIVE, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 	// validate request
@@ -60,7 +60,7 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 	// validate user
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -68,12 +68,12 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 	course := models.Course{ID: req.CourseID}
 	if err := app.DB.First(&course).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			internal.Respond(c, 404, false, "Course not found", nil)
+			internal.Respond(c, 404, false, "Không tìm thấy khóa học", nil)
 			return
 		}
 
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
 	// check prerequisite
@@ -115,7 +115,7 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 		).Where("registered_courses.user_id = ? AND courses.course_day = ? AND registered_courses.course_year = ? AND registered_courses.course_semester = ?", 
 		user.ID, course.CourseDay, req.CourseYear, req.CourseSemester).Find(&courses).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -123,7 +123,7 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 		for _, course_ := range courses {
 			for i := course_.CourseStartShift; i <= course_.CourseEndShift; i++ {
 				if i >= course.CourseStartShift && i <= course.CourseEndShift {
-					internal.Respond(c, 400, false, "Course shift is not available", nil)
+					internal.Respond(c, 400, false, "Ca học bị trùng", nil)
 					return
 				}
 			}
@@ -150,16 +150,16 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		switch err {
 		case ErrAlreadyRegistered:
-			internal.Respond(c, 400, false, "Already registered", nil)
+			internal.Respond(c, 400, false, ErrAlreadyRegistered.Error(), nil)
 			return
 		case ErrCourseFull:
-			internal.Respond(c, 400, false, "Course is full", nil)
+			internal.Respond(c, 400, false, ErrCourseFull.Error(), nil)
 			return
 		default:
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 	}
 
-	internal.Respond(c, 200, true, "Register course successfully", nil)
+	internal.Respond(c, 200, true, "Đăng ký khóa học thành công", registeredCourse)
 }

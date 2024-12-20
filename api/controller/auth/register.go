@@ -44,7 +44,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		sess, exists := c.Get("session")
 
 		if !exists {
-			internal.Respond(c, 401, false, "Unauthorized", nil)
+			internal.Respond(c, 401, false, "Xác thực không hợp lệ", nil)
 			return
 		}
 
@@ -54,12 +54,12 @@ func Register(c *gin.Context, app *bootstrap.App) {
 		}
 
 		if err := app.DB.First(&user).Error; err != nil {
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 
 		if user.UserRole != models.RoleAdmin {
-			internal.Respond(c, 401, false, "Permission denied", nil)
+			internal.Respond(c, 401, false, "Không có quyền truy cập", nil)
 			return
 		}
 	}
@@ -72,7 +72,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	var temp []models.User
 
 	if affectedRow := app.DB.Where(models.User{Username: r.Username}).Or(models.User{UserEmail: r.UserEmail}).Find(&temp).RowsAffected; affectedRow > 0 {
-		internal.Respond(c, 403, false, "User existed", nil)
+		internal.Respond(c, 403, false, "User đã tồn tại", nil)
 		return
 	}
 
@@ -80,7 +80,7 @@ func Register(c *gin.Context, app *bootstrap.App) {
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -109,11 +109,11 @@ func Register(c *gin.Context, app *bootstrap.App) {
 	}
 	if err := app.DB.Create(&userToCreate).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "User created", users.UserInfoResponse{
+	internal.Respond(c, 200, true, "Tạo user thành công", users.UserInfoResponse{
 		UserID:       userToCreate.ID,
 		Username:     userToCreate.Username,
 		UserEmail:    userToCreate.UserEmail,

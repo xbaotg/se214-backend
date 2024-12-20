@@ -39,7 +39,7 @@ func CheckPrerequisite(app *bootstrap.App, user *models.User, course *models.Cou
 		return "", err
 	}
 	if len(results) == 0 {
-		return prerequisitesCoursesName[0], errors.New("User has not taken the prerequisite course")
+		return prerequisitesCoursesName[0], errors.New("Người dùng chưa đăng ký môn học tiên quyết")
 	}
 	app.Logger.Info().Msgf("results: %v", results)
 	// check if user has taken the prerequisite course
@@ -52,7 +52,7 @@ func CheckPrerequisite(app *bootstrap.App, user *models.User, course *models.Cou
 			}
 		}
 		if !done {
-			return courseName, errors.New("User has not done the prerequisite course")
+			return courseName, errors.New("Nguời dùng chưa hoàn thành môn học tiên quyết")
 		}
 	}
 

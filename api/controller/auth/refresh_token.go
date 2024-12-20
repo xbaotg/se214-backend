@@ -35,7 +35,7 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	accessToken, AccessTokenPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTExpire))
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -43,7 +43,7 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 	refreshToken, refreshPayload, err := app.TokenMaker.CreateToken(session.UserID.String(), time.Second*time.Duration(app.Config.JWTRefreshExpire))
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -58,24 +58,24 @@ func RefreshToken(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Create(&updatedSession).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	// revoke old refresh token
 	if err := app.DB.Model(&session).Updates(models.Session{IsActive: false}).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Refresh token success", RefreshTokenResponse{
+	internal.Respond(c, 200, true, "Thành công", RefreshTokenResponse{
 		AccessToken:           accessToken,
 		AccessTokenExpiresIn:  AccessTokenPayload.ExpiredAt,
 		RefreshToken:          refreshToken,

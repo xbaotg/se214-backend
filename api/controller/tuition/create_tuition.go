@@ -33,6 +33,11 @@ type CreateTuitionRequest struct {
 // @Failure 500 {object} models.Response
 // @Router /tuition/create_tuition [post]
 func CreateTuition(c *gin.Context, app *bootstrap.App) {
+
+	if app.State != bootstrap.DONE {
+		internal.Respond(c, 403, false, "Chỉ có thể tạo học phí khi máy chủ ở trạng thái DONE", nil)
+		return
+	}
 	sess, _ := c.Get("session")
 	session := sess.(models.Session)
 
@@ -41,12 +46,12 @@ func CreateTuition(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -58,18 +63,13 @@ func CreateTuition(c *gin.Context, app *bootstrap.App) {
 // 2025-05-13T17:00:00.000Z"
 	deadline, err := time.Parse("2006-01-02T15:04:05.000Z", req.Deadline)
 	if err != nil {
-		internal.Respond(c, 400, false, "Invalid deadline", nil)
-		return
-	}
-
-	if app.State != bootstrap.DONE {
-		internal.Respond(c, 403, false, "Can only create tuition when server is in DONE state", nil)
+		internal.Respond(c, 400, false, "Deadline không hợp lệ", nil)
 		return
 	}
 
 	var users []models.User
 	if err := app.DB.Table("users").Where("user_role = ?", models.RoleUser).Find(&users).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -156,5 +156,5 @@ func CreateTuition(c *gin.Context, app *bootstrap.App) {
 
 	wg.Wait()
 
-	internal.Respond(c, 200, true, "All tuition created", nil)
+	internal.Respond(c, 200, true, "Tạo học phí thành công", nil)
 }

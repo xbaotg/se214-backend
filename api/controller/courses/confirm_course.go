@@ -25,7 +25,7 @@ import (
 // @Router /course/confirm [put]
 func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 	if app.State != bootstrap.SETUP {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái SETUP, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 	// get current user from session
@@ -36,18 +36,18 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.First(&user).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 	courseIDUUID, err := uuid.Parse(courseID)
 	if err != nil {
-		internal.Respond(c, 400, false, "Invalid course ID", nil)
+		internal.Respond(c, 400, false, "Mã khóa học không hợp lệ", nil)
 		return
 	}
 
 	// check if user is admin
 	if user.UserRole != models.RoleAdmin {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -56,7 +56,7 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 		ID: courseIDUUID,
 	}
 	if err := app.DB.First(&course).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 	currentCourses := []models.Course{
@@ -70,7 +70,7 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Where(currentCourses).Where("confirmed = ?", true).Find(&currentCourses).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -80,7 +80,7 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 		for _, c_ := range currentCourses {
 			for i := c_.CourseStartShift; i <= c_.CourseEndShift; i++ {
 				if i >= course.CourseStartShift && i <= course.CourseEndShift {
-					internal.Respond(c, 400, false, "Course shift is not available", nil)
+					internal.Respond(c, 400, false, "Ca học bị trùng", nil)
 					return
 				}
 			}
@@ -88,9 +88,9 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if err := app.DB.Model(&course).Update("confirmed", true).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
-	internal.Respond(c, 200, true, "Course confirmed", course)
+	internal.Respond(c, 200, true, "Xác nhận khóa học thành công", nil)
 }

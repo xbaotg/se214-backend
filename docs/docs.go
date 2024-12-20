@@ -2300,8 +2300,7 @@ const docTemplate = `{
                 },
                 "course_fullname": {
                     "type": "string",
-                    "maxLength": 200,
-                    "minLength": 5
+                    "maxLength": 200
                 },
                 "course_name": {
                     "type": "string",

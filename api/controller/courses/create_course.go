@@ -45,7 +45,7 @@ type CreateCourseRequest struct {
 // @Router /course/create [post]
 func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	if app.State != bootstrap.SETUP {
-		internal.Respond(c, 403, false, fmt.Sprintf("Server is not in setup state, current state is %s", app.State), nil)
+		internal.Respond(c, 403, false, fmt.Sprintf("Máy chủ không ở trạng thái SETUP, trạng thái hiện tại là %s", app.State), nil)
 		return
 	}
 	sess, _ := c.Get("session")
@@ -60,12 +60,12 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	}
 
 	if req.CurrentEnroll > req.MaxEnroll {
-		internal.Respond(c, 400, false, "Current enroll must be less than max enroll", nil)
+		internal.Respond(c, 400, false, "Số lượng sinh viên hiện tại không thể lớn hơn số lượng sinh viên tối đa", nil)
 		return
 	}
 
 	if req.CourseStartShift >= req.CourseEndShift {
-		internal.Respond(c, 400, false, "Course start shift must be less than course end shift", nil)
+		internal.Respond(c, 400, false, "Ca bắt đầu không thể lớn hơn hoặc bằng ca kết thúc", nil)
 		return
 	}
 
@@ -74,13 +74,13 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		ID: session.UserID,
 	}
 	if err := app.DB.First(&user).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
 	// check user role
 	if !slices.Contains([]models.Role{models.RoleAdmin, models.RoleLecturer}, user.UserRole) {
-		internal.Respond(c, 403, false, "Permission denied", nil)
+		internal.Respond(c, 403, false, "Không có quyền truy cập", nil)
 		return
 	}
 
@@ -95,7 +95,7 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 
 	// if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
 	// 	app.Logger.Error().Err(err).Msg(err.Error())
-	// 	internal.Respond(c, 500, false, "Internal server error", nil)
+	// 	internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	// 	return
 	// }
 
@@ -103,7 +103,7 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	// 	for _, course := range currentCourses {
 	// 		for i := course.CourseStartShift; i <= course.CourseEndShift; i++ {
 	// 			if i >= req.CourseStartShift && i <= req.CourseEndShift {
-	// 				internal.Respond(c, 400, false, "Course shift is not available", nil)
+	// 				internal.Respond(c, 400, false, "Ca học bị trùng", nil)
 	// 				return
 	// 			}
 	// 		}
@@ -132,7 +132,7 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 	if err := app.DB.Where(courseName).First(&courseName).Error; err != nil {
 		if err := app.DB.Create(&courseName).Error; err != nil {
 			app.Logger.Error().Err(err).Msg(err.Error())
-			internal.Respond(c, 500, false, "Internal server error", nil)
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 	}
@@ -150,7 +150,7 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -160,10 +160,10 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 				for i := course.CourseStartShift; i <= course.CourseEndShift; i++ {
 					if i >= req.CourseStartShift && i <= req.CourseEndShift {
 						if course.CourseTeacherID == req.CourseTeacherID {
-							internal.Respond(c, 400, false, "Course shift is not available", nil)
+							internal.Respond(c, 400, false, "Giáo viên đã có lịch dạy", nil)
 						}
 						if course.CourseRoom == req.CourseRoom {
-							internal.Respond(c, 400, false, "Course room is not available", nil)
+							internal.Respond(c, 400, false, "Phòng học đã có lịch học", nil)
 						}
 						return
 					}
@@ -177,7 +177,7 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 
 	if err := app.DB.Create(&course).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -198,5 +198,5 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		CourseRoom:       course.CourseRoom,
 	}
 
-	internal.Respond(c, 200, true, "Course created", courseResponse)
+	internal.Respond(c, 200, true, "Tạo khóa học thành công", courseResponse)
 }

@@ -84,7 +84,6 @@ definitions:
         type: integer
       course_fullname:
         maxLength: 200
-        minLength: 5
         type: string
       course_name:
         maxLength: 100

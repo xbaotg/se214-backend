@@ -59,7 +59,7 @@ func SessionMiddleware(app *bootstrap.App, shouldCancel bool) gin.HandlerFunc {
 
 			app.Logger.Error().Err(err).Msg("Failed to get session")
 			if shouldCancel {
-				internal.Respond(c, 500, false, "Internal server error", nil)
+				internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 				c.Abort()
 			}
 			return

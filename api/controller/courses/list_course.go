@@ -26,7 +26,7 @@ type ListCourseRequest struct {
 func ListCourses(c *gin.Context, app *bootstrap.App) {
 	courses := []models.Course{}
 	if err := app.DB.Where("confirmed = ?", true).Find(&courses).Error; err != nil {
-		internal.Respond(c, 500, false, "Internal server error", nil)
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return
 	}
 
@@ -50,5 +50,5 @@ func ListCourses(c *gin.Context, app *bootstrap.App) {
 		})
 	}
 
-	internal.Respond(c, 200, true, "Courses found", coursesResponse)
+	internal.Respond(c, 200, true, "Lấy danh sách khóa học thành công", coursesResponse)
 }
