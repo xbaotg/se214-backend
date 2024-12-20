@@ -751,6 +751,34 @@ paths:
       summary: Set global state
       tags:
       - Global
+  /global/stats:
+    get:
+      description: Get stats
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get stats
+      tags:
+      - Global
   /global/tuition_type:
     get:
       description: Get tuition type

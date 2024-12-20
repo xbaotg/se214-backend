@@ -20,6 +20,9 @@ type Config struct {
 
 	TuitionType string `mapstructure:"TUITION_TYPE"`
 	TuitionCost int    `mapstructure:"TUITION_COST"`
+
+	CurrentYear int `mapstructure:"CURRENT_YEAR"`
+	CurrentSemester int `mapstructure:"CURRENT_SEMESTER"`
 }
 
 func NewConfig() *Config {
