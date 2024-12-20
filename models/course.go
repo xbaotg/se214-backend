@@ -56,23 +56,24 @@ func (ns NullDay) Value() (driver.Value, error) {
 }
 
 type Course struct {
-	ID               uuid.UUID
-	CourseTeacherID  uuid.UUID
-	DepartmentID     uuid.UUID
-	CourseName       string
-	CourseFullname   string
-	CourseCredit     int32
-	CourseYear       int32
-	CourseSemester   int32
-	CourseStartShift int32
-	CourseEndShift   int32
-	CourseDay        Day
-	MaxEnroller      int32
-	CurrentEnroller  int32
-	CourseRoom       string
-	Confirmed 	  bool
-	CreatedAt        time.Time  `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time  `gorm:"autoUpdateTime"`
-	Teacher          User       `gorm:"foreignKey:CourseTeacherID" json:"-"`
-	Department       Department `gorm:"foreignKey:DepartmentID" json:"-"`
+	ID              uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	CourseTeacherID uuid.UUID `gorm:"type:uuid;not null"`
+	DepartmentID    uuid.UUID `gorm:"type:uuid;not null"`
+	CourseName      string    `gorm:"type:text;not null"`
+	CourseFullname  string    `gorm:"type:text;not null"`
+	CourseCredit    int32       `gorm:"not null"`
+	CourseYear      int32       `gorm:"not null"`
+	CourseSemester  int32       `gorm:"not null"`
+	CourseStartShift int32      `gorm:"not null"`
+	CourseEndShift   int32      `gorm:"not null"`
+	CourseDay       Day       `gorm:"type:day;not null"`
+	Confirmed       bool      `gorm:"not null;default:false"`
+	MaxEnroller     int32       `gorm:"not null"`
+	CurrentEnroller int32      `gorm:"not null"`
+	CourseRoom      string    `gorm:"type:text;not null"`
+	CreatedAt       time.Time `gorm:"autoCreateTime"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
+
+	Teacher    User       `gorm:"foreignKey:CourseTeacherID" json:"-"`
+	Department Department `gorm:"foreignKey:DepartmentID" json:"-"`
 }

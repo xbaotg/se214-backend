@@ -51,7 +51,7 @@ func (ns NullTuStatus) Value() (driver.Value, error) {
 }
 
 type Tuition struct {
-	ID              uuid.UUID
+	ID              uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	UserID          uuid.UUID
 	Tuition         int32
 	Paid            int32

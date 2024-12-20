@@ -187,6 +187,22 @@ definitions:
     required:
     - course_id
     type: object
+  coursesmanagament.UserUnRegisterAdminCourseRequest:
+    properties:
+      course_id:
+        type: string
+      course_semester:
+        type: integer
+      course_year:
+        type: integer
+      user_id:
+        type: string
+    required:
+    - course_id
+    - course_semester
+    - course_year
+    - user_id
+    type: object
   coursesmanagament.UserUnRegisterCourseRequest:
     properties:
       course_id:
@@ -316,6 +332,26 @@ definitions:
         type: string
       max_enroll:
         type: integer
+    type: object
+  subject.AddPrerequisiteRequest:
+    properties:
+      course_id:
+        type: string
+      prerequisite_id:
+        type: string
+    required:
+    - course_id
+    - prerequisite_id
+    type: object
+  subject.SubjectCreateRequest:
+    properties:
+      course_fullname:
+        type: string
+      course_name:
+        type: string
+    required:
+    - course_fullname
+    - course_name
     type: object
   tuition.CalTuitionRequest:
     properties:
@@ -1025,6 +1061,262 @@ paths:
       summary: Get the state of the app
       tags:
       - Global
+  /subject/add_prerequisite:
+    post:
+      consumes:
+      - application/json
+      description: Add Prerequisite
+      parameters:
+      - description: AddPrerequisiteRequest
+        in: body
+        name: AddPrerequisiteRequest
+        required: true
+        schema:
+          $ref: '#/definitions/subject.AddPrerequisiteRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Add Prerequisite
+      tags:
+      - Subject
+  /subject/create:
+    post:
+      consumes:
+      - application/json
+      description: Create subject
+      parameters:
+      - description: SubjectCreateRequest
+        in: body
+        name: SubjectCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/subject.SubjectCreateRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create subject
+      tags:
+      - Subject
+  /subject/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete subject
+      parameters:
+      - description: Course name
+        in: query
+        name: course_name
+        required: true
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete subject
+      tags:
+      - Subject
+  /subject/delete_prerequisite:
+    post:
+      consumes:
+      - application/json
+      description: Delete Prerequisite
+      parameters:
+      - description: AddPrerequisiteRequest
+        in: body
+        name: AddPrerequisiteRequest
+        required: true
+        schema:
+          $ref: '#/definitions/subject.AddPrerequisiteRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete Prerequisite
+      tags:
+      - Subject
+  /subject/list:
+    get:
+      consumes:
+      - application/json
+      description: List subject
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List subject
+      tags:
+      - Subject
+  /subject/prerequisite:
+    get:
+      consumes:
+      - application/json
+      description: List prerequisite
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Course name
+        in: query
+        name: course_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: List prerequisite
+      tags:
+      - Subject
   /tuition/cal_tuition:
     post:
       consumes:
@@ -1376,6 +1668,46 @@ paths:
       summary: User unregister course
       tags:
       - User
+  /user/course/unregister_admin:
+    post:
+      consumes:
+      - application/json
+      description: User unregister admin course
+      parameters:
+      - description: UserUnRegisterCourseRequest
+        in: body
+        name: UserUnRegisterAdminCourseRequest
+        required: true
+        schema:
+          $ref: '#/definitions/coursesmanagament.UserUnRegisterAdminCourseRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: User unregister admin course
+      tags:
+      - User
   /user/credit:
     post:
       consumes:
@@ -1473,7 +1805,7 @@ paths:
       tags:
       - User
   /user/update:
-    post:
+    put:
       consumes:
       - application/json
       description: Update user

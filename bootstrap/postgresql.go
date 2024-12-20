@@ -25,6 +25,7 @@ func NewConnection(config *Config) *gorm.DB {
 	}
 
 	// migrate schema
+	// db.AutoMigrate(&models.AllCourses{})
 	// db.AutoMigrate(&models.User{})
 	// db.AutoMigrate(&models.Course{})
 	// db.AutoMigrate(&models.Department{})
@@ -32,6 +33,10 @@ func NewConnection(config *Config) *gorm.DB {
 	// db.AutoMigrate(&models.RegisteredCourse{})
 	// db.AutoMigrate(&models.PrerequisiteCourse{})
 	// db.AutoMigrate(&models.Session{})
+
+	if err := db.AutoMigrate(&models.AllCourses{}); err != nil {
+		log.Fatal(err)
+	}
 
 	if err := db.AutoMigrate(&models.User{}); err != nil {
 		log.Fatal(err)

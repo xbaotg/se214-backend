@@ -5,36 +5,56 @@ import (
 	"be/models"
 	"errors"
 
-	"gorm.io/gorm"
+	// "gorm.io/gorm"
 )
 
-func CheckPrerequisite(app *bootstrap.App, user *models.User, course *models.Course) error {
-	prerequisite := models.PrerequisiteCourse{CourseID: course.ID}
-
-	if err := app.DB.First(&prerequisite).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// if course has no prerequisite
-			return nil
-		}
-
+func CheckPrerequisite(app *bootstrap.App, user *models.User, course *models.Course) (string, error) {
+	prerequisites := []models.PrerequisiteCourse{}
+	if err := app.DB.Table("prerequisite_courses").Where("course_id = ?", course.CourseName).Find(&prerequisites).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		return err
+		return "", err
 	}
+	
+	// check if user has taken the prerequisite course
+	prerequisitesCoursesName := []string{}
+	for _, prerequisite := range prerequisites {
+		prerequisitesCoursesName = append(prerequisitesCoursesName, prerequisite.PrerequisiteID)
+	}
+
+	app.Logger.Info().Msgf("prerequisitesCoursesName: %v", prerequisitesCoursesName)
 
 	// check if user has taken the prerequisite course
-	userCourse := models.RegisteredCourse{UserID: user.ID, CourseID: prerequisite.PrerequisiteID}
-	if err := app.DB.First(&userCourse).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("user has not taken the prerequisite course")
-		}
-
+	type Result struct {
+		CourseName string
+		Status     models.CoStatus
+	}
+	if len(prerequisitesCoursesName) == 0 {
+		return "", nil
+	}
+	results := []Result{}
+	if err := app.DB.Table("registered_courses").Joins("JOIN courses ON registered_courses.course_id = courses.id").Where(
+		"registered_courses.user_id = ? and courses.course_name IN ?", user.ID, prerequisitesCoursesName,
+		).Select("courses.course_name as course_name, registered_courses.status as status").Scan(&results).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
-		return err
+		return "", err
+	}
+	if len(results) == 0 {
+		return prerequisitesCoursesName[0], errors.New("User has not taken the prerequisite course")
+	}
+	app.Logger.Info().Msgf("results: %v", results)
+	// check if user has taken the prerequisite course
+	for _,courseName := range prerequisitesCoursesName {
+		done := false
+		for _, result := range results {
+			if result.CourseName == courseName && result.Status == models.CoStatusDone {
+				done = true
+				break
+			}
+		}
+		if !done {
+			return courseName, errors.New("User has not done the prerequisite course")
+		}
 	}
 
-	if userCourse.Status != models.CoStatusDone {
-		return errors.New("user has not completed the prerequisite course")
-	}
-
-	return nil
+	return "", nil
 }

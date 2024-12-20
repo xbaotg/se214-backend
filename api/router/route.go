@@ -9,6 +9,7 @@ import (
 	lecturerCourseController "be/api/controller/users/lecturer"
 	globalController "be/api/controller/global"
 	tuitionController "be/api/controller/tuition"
+	subjectController "be/api/controller/subject"
 	"be/api/middleware"
 	"be/bootstrap"
 
@@ -64,6 +65,15 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	protectedRouter.DELETE("/course/delete/:course_id", func(c *gin.Context) { coursesController.DeleteCourse(c, app) })
 	protectedRouter.PUT("/course/edit", func(c *gin.Context) { coursesController.EditCourse(c, app) })
 	protectedRouter.PUT("/course/confirm", func(c *gin.Context) { coursesController.ConfirmCourse(c,app)})
+
+	// subject routes
+	protectedRouter.GET("/subject/list", func(c *gin.Context) { subjectController.ListSubject(c, app) })
+	protectedRouter.POST("/subject/create", func(c *gin.Context) { subjectController.CreateSubject(c, app) })
+	protectedRouter.DELETE("/subject/delete", func(c *gin.Context) { subjectController.DeleteSubject(c, app) })
+	protectedRouter.GET("/subject/prerequisite", func(c *gin.Context) { subjectController.ListPrerequisite(c, app) })
+	protectedRouter.POST("/subject/add_prerequisite", func(c *gin.Context) { subjectController.AddPrerequisite(c, app) })
+	protectedRouter.POST("/subject/delete_prerequisite", func(c *gin.Context) { subjectController.DeletePrerequisite(c, app) })
+	
 
 	// department routes
 	protectedRouter.POST("/department/create", func(c *gin.Context) { departmentsController.CreateDepartment(c, app) })

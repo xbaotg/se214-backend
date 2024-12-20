@@ -7,7 +7,7 @@ import (
 )
 
 type Session struct {
-	ID           uuid.UUID
+	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	UserID       uuid.UUID
 	RefreshToken string
 	ExpiresIn    time.Time

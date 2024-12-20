@@ -2,15 +2,14 @@ package models
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type PrerequisiteCourse struct {
-	CourseID       uuid.UUID
-	PrerequisiteID uuid.UUID
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Course         Course `gorm:"foreignKey:CourseID;references:ID" json:"-"`
-	Prerequisite   Course `gorm:"foreignKey:PrerequisiteID;references:ID" json:"-"`
+	CourseID       string    `gorm:"type:text;not null"`
+	PrerequisiteID string    `gorm:"type:text;not null"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
+
+	Course       AllCourses `gorm:"foreignKey:CourseID;references:CourseName" json:"-"`
+	Prerequisite AllCourses `gorm:"foreignKey:PrerequisiteID;references:CourseName" json:"-"`
 }

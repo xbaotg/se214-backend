@@ -77,8 +77,8 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 	}
 
 	// check prerequisite
-	if err := CheckPrerequisite(app, &user, &course); err != nil {
-		internal.Respond(c, 400, false, err.Error(), nil)
+	if co, err := CheckPrerequisite(app, &user, &course); err != nil {
+		internal.Respond(c, 406, false, err.Error(), gin.H{"course": co})
 		return
 	}
 

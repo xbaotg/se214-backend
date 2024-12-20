@@ -30,8 +30,9 @@ type UpdateUserRequest struct {
 // @Failure 404 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
-// @Router /user/update [post]
+// @Router /user/update [put]
 func UpdateUser(c *gin.Context, app *bootstrap.App) {
+	app.Logger.Info().Msg("Update user")
 	req := UpdateUserRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		internal.Respond(c, 400, false, err.Error(), nil)

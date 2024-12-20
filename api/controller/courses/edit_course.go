@@ -79,6 +79,14 @@ func EditCourse(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
+
+	courseName := models.AllCourses{CourseName: req.CourseName, Status: true}
+	if err := app.DB.Table("all_courses").Where(courseName).FirstOrCreate(&courseName).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
+
 	currentCourses := []models.Course{
 		models.Course{
 			CourseDay:      req.CourseDay,

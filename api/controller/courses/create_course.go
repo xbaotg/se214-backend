@@ -17,7 +17,7 @@ type CreateCourseRequest struct {
 	CourseTeacherID  uuid.UUID  `json:"course_teacher_id" binding:"required"`
 	CourseDepartment uuid.UUID  `json:"course_department" binding:"required"`
 	CourseName       string     `json:"course_name" binding:"required,min=3,max=100"`
-	CourseFullname   string     `json:"course_fullname" binding:"required,min=5,max=200"`
+	CourseFullname   string     `json:"course_fullname" binding:"required,max=200"`
 	CourseCredit     int32      `json:"course_credit" binding:"required,min=1,max=12"`
 	CourseYear       int32      `json:"course_year" binding:"required,min=2000,max=2100"`
 	CourseSemester   int32      `json:"course_semester" binding:"required,oneof=1 2 3"`
@@ -127,32 +127,51 @@ func CreateCourse(c *gin.Context, app *bootstrap.App) {
 		CurrentEnroller:  req.CurrentEnroll,
 		CourseRoom:       req.CourseRoom,
 	}
-	if user.UserRole == models.RoleAdmin {
-		currentCourses := []models.Course{
-			models.Course{
-				CourseDay:      req.CourseDay,
-				CourseYear:     req.CourseYear,
-				CourseSemester: req.CourseSemester,
-				CourseRoom:     req.CourseRoom,
-			},
-		}
 
-		if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
+	courseName := models.AllCourses{CourseName: req.CourseName, Status: true}
+	if err := app.DB.Where(courseName).First(&courseName).Error; err != nil {
+		if err := app.DB.Create(&courseName).Error; err != nil {
 			app.Logger.Error().Err(err).Msg(err.Error())
 			internal.Respond(c, 500, false, "Internal server error", nil)
 			return
 		}
+	}
 
-		if len(currentCourses) > 0 {
-			for _, course := range currentCourses {
+	// if user.UserRole == models.RoleAdmin {
+	currentCourses := []models.Course{
+		models.Course{
+			CourseDay:      req.CourseDay,
+			CourseYear:     req.CourseYear,
+			CourseSemester: req.CourseSemester,
+			// CourseTeacherID: req.CourseTeacherID,
+			// CourseRoom:     req.CourseRoom,
+		},
+	}
+
+	if err := app.DB.Where(currentCourses).Find(&currentCourses).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Internal server error", nil)
+		return
+	}
+
+	if len(currentCourses) > 0 {
+		for _, course := range currentCourses {
+			if course.CourseTeacherID == req.CourseTeacherID || course.CourseRoom == req.CourseRoom {
 				for i := course.CourseStartShift; i <= course.CourseEndShift; i++ {
 					if i >= req.CourseStartShift && i <= req.CourseEndShift {
-						internal.Respond(c, 400, false, "Course shift is not available", nil)
+						if course.CourseTeacherID == req.CourseTeacherID {
+							internal.Respond(c, 400, false, "Course shift is not available", nil)
+						}
+						if course.CourseRoom == req.CourseRoom {
+							internal.Respond(c, 400, false, "Course room is not available", nil)
+						}
 						return
 					}
 				}
-			}
+			}				
 		}
+	}
+	if user.UserRole == models.RoleAdmin {
 		course.Confirmed = true
 	}
 

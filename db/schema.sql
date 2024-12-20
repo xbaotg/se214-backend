@@ -53,8 +53,8 @@ create table departments (
 );
 
 create table prerequisite_courses (
-	    course_id UUID not null,
-	    prerequisite_id UUID not null,
+	    course_id text not null,
+	    prerequisite_id text not null,
 	    created_at timestamp not null default now(),
 	    updated_at timestamp not null default now()
 );
@@ -73,11 +73,27 @@ create table tuitions (
 	    updated_at timestamp not null default now()
 );
 
+create table all_courses (
+	course_name text primary key not null,
+	course_fullname text not null,
+	status boolean not null default true,
+	created_at timestamp not null default now(),
+	updated_at timestamp not null default now()
+);
+
 alter table tuitions add constraint fk_user_id foreign key (user_id) references users (id);
-alter table courses add constraint fk_courese_user_id foreign key (course_teacher_id) references users (id);
+alter table courses add constraint fk_course_user_id foreign key (course_teacher_id) references users (id);
 alter table courses add constraint fk_department_id foreign key (department_id) references departments (id);
 alter table registered_courses add constraint fk_course_id foreign key (course_id) references courses (id);
 alter table registered_courses add constraint fk_resgiter_users_id foreign key (user_id) references users (id);
-alter table prerequisite_courses add constraint fk_course_id foreign key (course_id) references courses (id);
-alter table prerequisite_courses add constraint fk_prerequisite_id foreign key (prerequisite_id) references courses (id);
+-- alter table prerequisite_courses add constraint fk_course_id foreign key (course_id) references courses (id);
+-- alter table prerequisite_courses add constraint fk_prerequisite_id foreign key (prerequisite_id) references courses (id);
+alter table courses add constraint fk_course_name foreign key (course_name) references all_courses (course_name);
+alter table prerequisite_courses add constraint fk_prerequisite_courses_all_courses foreign key (course_id) references all_courses (course_name);
+alter table prerequisite_courses add constraint fk_prerequisite_courses_prerequisite foreign key (prerequisite_id) references all_courses (course_name);
 
+ALTER TABLE prerequisite_courses
+ADD CONSTRAINT unique_course_prerequisite
+UNIQUE (course_id, prerequisite_id);
+
+insert into users (username, password, user_fullname, user_role, year) values ('admin', '$2a$10$VFKP3WQvhZRb7CGVag1li.6DjtTKqp3tIoTpDLGPIY4pGQvwC1QXm', 'admin', 'admin', 0);
