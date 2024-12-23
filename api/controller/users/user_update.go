@@ -14,7 +14,6 @@ type UpdateUserRequest struct {
 	UserFullname string      `json:"user_fullname"`
 	UserRole     models.Role `json:"user_role"`
 	Year         int32       `json:"year"`
-
 }
 
 // Update user

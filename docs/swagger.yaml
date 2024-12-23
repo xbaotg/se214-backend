@@ -299,6 +299,14 @@ definitions:
     - RoleAdmin
     - RoleUser
     - RoleLecturer
+  models.TuStatus:
+    enum:
+    - paid
+    - unpaid
+    type: string
+    x-enum-varnames:
+    - TuStatusPaid
+    - TuStatusUnpaid
   schemas.CreateCourseResponse:
     properties:
       course_credit:
@@ -352,6 +360,19 @@ definitions:
     - course_fullname
     - course_name
     type: object
+  tuition.CalTuitionAdminRequest:
+    properties:
+      semester:
+        type: integer
+      user_id:
+        type: string
+      year:
+        type: integer
+    required:
+    - semester
+    - user_id
+    - year
+    type: object
   tuition.CalTuitionRequest:
     properties:
       semester:
@@ -385,6 +406,25 @@ definitions:
         type: string
       year:
         type: integer
+    type: object
+  tuition.UpdateTuitionRequest:
+    properties:
+      deadline:
+        type: string
+      semester:
+        type: integer
+      tuition:
+        type: integer
+      tuition_status:
+        $ref: '#/definitions/models.TuStatus'
+      user_id:
+        type: string
+      year:
+        type: integer
+    required:
+    - semester
+    - user_id
+    - year
     type: object
   users.ChangePassRequest:
     properties:
@@ -645,6 +685,45 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Create department
+      tags:
+      - Department
+  /department/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete department
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Department code
+        in: query
+        name: department_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Department'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete department
       tags:
       - Department
   /department/list:
@@ -1424,6 +1503,85 @@ paths:
       summary: Create tuition
       tags:
       - Tuition
+  /tuition/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Tuition ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete tuition
+      tags:
+      - Tuition
+  /tuition/get_tuition:
+    post:
+      consumes:
+      - application/json
+      description: Calculate tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: CalTuitionAdminRequest
+        in: body
+        name: CalTuitionAdminRequest
+        required: true
+        schema:
+          $ref: '#/definitions/tuition.CalTuitionAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Calculate tuition
+      tags:
+      - Tuition
   /tuition/list:
     get:
       consumes:
@@ -1496,6 +1654,46 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Pay tuition
+      tags:
+      - Tuition
+  /tuition/update_tuition:
+    put:
+      consumes:
+      - application/json
+      description: Update tuition
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: UpdateTuitionRequest
+        in: body
+        name: UpdateTuitionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/tuition.UpdateTuitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Update tuition
       tags:
       - Tuition
   /user/change-pass:
@@ -1769,6 +1967,49 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Get credit
+      tags:
+      - User
+  /user/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete user
       tags:
       - User
   /user/info:

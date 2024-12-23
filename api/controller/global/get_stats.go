@@ -80,11 +80,11 @@ func GetStats(c *gin.Context, app *bootstrap.App) {
 		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 	}
 
-	if err := app.DB.Table("tuitions").Select("SUM(cost)").Where("status = ? and year = ? and semester = ?", 
+	if err := app.DB.Table("tuitions").Select("SUM(cost)").Where("tuition_status = ? and year = ? and semester = ?", 
 		models.TuStatusPaid, app.Config.CurrentYear, app.Config.CurrentSemester).Count(&stats.TotalMoney).Error; err != nil {
 	}
 
-	if err := app.DB.Table("tuitions").Select("DISTINCT user_id").Where("status = ? and year = ? and semester = ?", 
+	if err := app.DB.Table("tuitions").Select("DISTINCT user_id").Where("tuition_status = ? and year = ? and semester = ?", 
 		models.TuStatusPaid, app.Config.CurrentYear, app.Config.CurrentSemester).Count(&stats.TotalStudentPaid).Error; err != nil {
 	}
 

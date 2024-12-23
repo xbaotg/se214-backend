@@ -53,6 +53,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	protectedRouter.GET("/user/list", func(c *gin.Context) { usersController.ListUsers(c, app) })
 	protectedRouter.PATCH("/user/change-password", func(c *gin.Context) { usersController.ChangePassUser(c, app) })
 	protectedRouter.PUT("/user/update", func(c *gin.Context) { usersController.UpdateUser(c, app) })
+	protectedRouter.DELETE("/user/delete", func(c *gin.Context) { usersController.DeleteUser(c, app) })
 
 	// user - course routes
 	protectedRouter.GET("/user/course/list", func(c *gin.Context) { usersCourseController.UserListCourse(c, app) })
@@ -79,6 +80,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// department routes
 	protectedRouter.POST("/department/create", func(c *gin.Context) { departmentsController.CreateDepartment(c, app) })
 	protectedRouter.PUT("/department/update", func(c *gin.Context) { departmentsController.UpdateDepartment(c, app) })
+	protectedRouter.DELETE("/department/delete", func(c *gin.Context) { departmentsController.DeleteDepartment(c, app) })
 
 	//lecturer routes
 	protectedRouter.GET("/lecturer/course/list", func(c *gin.Context) { lecturerCourseController.ListLecturerCourses(c, app) })
@@ -90,5 +92,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	protectedRouter.POST("/tuition/create_tuition", func(c *gin.Context) { tuitionController.CreateTuition(c, app)})
 	protectedRouter.GET("/tuition/list", func(c *gin.Context) { tuitionController.ListTuition(c, app) })
 	protectedRouter.POST("/tuition/pay", func(c *gin.Context) { tuitionController.PayTuition(c, app) })
-
+	protectedRouter.POST("/tuition/get_tuition", func(c *gin.Context) { tuitionController.GetTuition(c, app) })
+	protectedRouter.PUT("/tuition/update_tuition", func(c *gin.Context) { tuitionController.UpdateTuition(c, app) })
+	protectedRouter.DELETE("/tuition/delete", func(c *gin.Context) { tuitionController.DeleteTuition(c, app) })
 }

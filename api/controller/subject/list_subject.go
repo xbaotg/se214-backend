@@ -46,7 +46,8 @@ func ListSubject(c *gin.Context, app *bootstrap.App) {
 	results := []SubjectsResponse{}
 	if err:= app.DB.Table("all_courses").Joins("LEFT JOIN courses ON all_courses.course_name = courses.course_name").Joins(
 		"LEFT JOIN departments ON courses.department_id = departments.id").Where("all_courses.status = ?", true).Select(
-			"all_courses.course_name, all_courses.course_fullname, departments.department_code").Scan(&results).Error; err != nil {
+			"all_courses.course_name, all_courses.course_fullname, departments.department_code").Group(
+				"all_courses.course_name, all_courses.course_fullname, departments.department_code").Scan(&results).Error; err != nil {
 		app.Logger.Error().Err(err).Msg(err.Error())
 		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 		return

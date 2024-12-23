@@ -57,26 +57,28 @@ func CreateSubject(c *gin.Context, app *bootstrap.App) {
 
 	// check if course already exists
 	course := models.AllCourses{CourseName: req.CourseName, CourseFullname: req.CourseFullname}
-	if res := app.DB.Table("all_courses").Where("course_name = ?", req.CourseName).FirstOrCreate(&course); res.Error != nil {
-		if res.RowsAffected == 0 {
-			app.Logger.Info().Msg("Course already exists")
-			if err := app.DB.Table("all_courses").Where(course).Update("status", true).Error; err != nil {
+	res := app.DB.Table("all_courses").Where("course_name = ?", req.CourseName).FirstOrCreate(&course)
+	if res.Error != nil {
+		app.Logger.Error().Err(res.Error).Msg(res.Error.Error())
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+		return
+	}
+	if res.RowsAffected == 0 {
+		app.Logger.Info().Msg("Course already exists")
+		if err := app.DB.Table("all_courses").Where("course_name = ?", req.CourseName).Update("status", true).Error; err != nil {
+			app.Logger.Error().Err(err).Msg(err.Error())
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+			return
+		}
+
+		if req.CourseFullname != "" {
+			if err := app.DB.Table("all_courses").Where("course_name = ?", req.CourseName).Update("course_fullname", req.CourseFullname).Error; err != nil {
 				app.Logger.Error().Err(err).Msg(err.Error())
 				internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 				return
 			}
-
-			if req.CourseFullname != "" {
-				if err := app.DB.Table("all_courses").Where(course).Update("course_fullname", req.CourseFullname).Error; err != nil {
-					app.Logger.Error().Err(err).Msg(err.Error())
-					internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
-					return
-				}
-			}
-			internal.Respond(c, 200, true, "Môn học đã tồn tại", course)
 		}
-		app.Logger.Error().Err(res.Error).Msg(res.Error.Error())
-		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+		internal.Respond(c, 200, true, "Môn học đã tồn tại", course)
 		return
 	}
 
