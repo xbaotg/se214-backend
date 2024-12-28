@@ -58,6 +58,20 @@ func UpdateUser(c *gin.Context, app *bootstrap.App) {
 		internal.Respond(c, 404, false, "Không tìm thấy người dùng", nil)
 		return
 	}
+	if updateUser.UserRole == models.RoleLecturer {
+		var count int64
+		if err := app.DB.Table("courses").Where(
+			"course_teacher_id = ?", updateUser.ID,
+			).Count(&count).Error; err != nil {
+			app.Logger.Error().Err(err).Msg(err.Error())
+			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+			return
+		}
+		if count > 0 {
+			internal.Respond(c, 403, false, "Không thể cập nhật giảng viên đang giảng dạy", nil)
+			return
+		}
+	}
 
 	updateUser.UserFullname = req.UserFullname
 	updateUser.UserRole = req.UserRole

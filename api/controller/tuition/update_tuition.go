@@ -12,10 +12,9 @@ import (
 )
 
 type UpdateTuitionRequest struct {
-	UserID uuid.UUID `json:"user_id" binding:"required"`
-	Year 	 int32    `json:"year" binding:"required"`
-	Semester int32    `json:"semester" binding:"required"`
+	ID uuid.UUID `json:"id"`
 	Tuition  int32    `json:"tuition"`
+	Paid    int32    `json:"paid"`
 	Deadline string `json:"deadline"`
 	TuitionStatus models.TuStatus `json:"tuition_status"`
 }
@@ -64,9 +63,7 @@ func UpdateTuition(c *gin.Context, app *bootstrap.App) {
 	}
 
 	tuition := models.Tuition{
-		UserID: req.UserID,
-		Year: req.Year,
-		Semester: req.Semester,
+		ID: req.ID,
 	}
 
 	if err := app.DB.Where(&tuition).First(&tuition).Error; err != nil {
@@ -77,6 +74,7 @@ func UpdateTuition(c *gin.Context, app *bootstrap.App) {
 	tuition.Tuition = req.Tuition
 	tuition.TuitionDeadline = deadline
 	tuition.TuitionStatus = req.TuitionStatus
+	tuition.Paid = req.Paid
 
 	if err := app.DB.Save(&tuition).Error; err != nil {
 		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)

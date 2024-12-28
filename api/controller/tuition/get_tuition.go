@@ -100,8 +100,15 @@ func GetTuition(c *gin.Context, app *bootstrap.App) {
 			})
 		}
 	}
+
+	tuition := models.Tuition{}
+	if err := app.DB.Where("user_id = ? AND year = ? AND semester = ?", user.ID, req.Year, req.Semester).First(&tuition).Error; err != nil {
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+		return
+	}
 	internal.Respond(c, 200, true, "Tuition", gin.H{
 		"courses": coursesResponse,
 		"credit": credit,
+		"tuition": tuition.Tuition,
 	})
 }

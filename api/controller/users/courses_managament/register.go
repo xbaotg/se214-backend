@@ -130,6 +130,19 @@ func UserRegisterCourse(c *gin.Context, app *bootstrap.App) {
 		}
 	}	
 
+	if err := app.DB.Table("registered_courses").Joins(
+		"JOIN courses ON courses.id = registered_courses.course_id",
+		).Where("registered_courses.user_id = ? AND courses.course_name = ?", user.ID, course.CourseName).Select("courses.*").Find(&courses).Error; err != nil {
+		app.Logger.Error().Err(err).Msg(err.Error())
+		internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
+		return
+	}
+
+	if len(courses) > 0 {
+		internal.Respond(c, 400, false, "Khóa học đã đăng ký", nil)
+		return
+	}
+
 	// Update current enroller of the course
 	if err := app.DB.Transaction(func(tx *gorm.DB) error {
 

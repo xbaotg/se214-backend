@@ -1,13 +1,15 @@
+version: "3.7"
 services:
-  # postgres:
-  #   image: postgres:alpine3.20
-  #   environment:
-  #     - POSTGRES_USER=root
-  #     - POSTGRES_PASSWORD=aictuongbck
-  #     - POSTGRES_DB=se214
-
   backend:
     container_name: se214_backend
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    networks:
+      - bck
+
+networks:
+  bck:
+    driver: bridge

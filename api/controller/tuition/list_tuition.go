@@ -4,9 +4,26 @@ import (
 	"be/internal"
 	"be/bootstrap"
 	"be/models"
+	"time"
 	
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
+
+type TuitionResponse struct {
+	ID              uuid.UUID 
+	UserID          uuid.UUID
+	Tuition         int32
+	Paid            int32
+	TotalCredit     int32
+	Year            int32
+	Semester        int32
+	TuitionStatus   models.TuStatus
+	TuitionDeadline time.Time
+	CreatedAt       time.Time 
+	UpdatedAt       time.Time 
+	Username 	  string
+}
 
 // ListTuition godoc
 // @Summary List tuition
@@ -33,20 +50,23 @@ func ListTuition(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	var tuitions []models.Tuition
+	var tuitions []TuitionResponse
 	if user.UserRole == models.RoleAdmin {
-		if err := app.DB.Find(&tuitions).Error; err != nil {
+		if err := app.DB.Table("tuitions").Select("tuitions.*, users.username").Joins(
+			"left join users on tuitions.user_id = users.id",
+			).Find(&tuitions).Error; err != nil {
 			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 		internal.Respond(c, 200, true, "Danh sách học phí", tuitions)
-		return
 	} else {
-		if err := app.DB.Where("user_id = ?", user.ID).Find(&tuitions).Error; err != nil {
+		if err := app.DB.Table("tuitions").Select("tuitions.*, users.username").Joins(
+			"left join users on tuitions.user_id = users.id",
+			).Where("tuitions.user_id = ?", session.UserID).Find(&tuitions).Error; err != nil {
 			internal.Respond(c, 500, false, "Lỗi máy chủ", nil)
 			return
 		}
 		internal.Respond(c, 200, true, "Danhs sách học phí", tuitions)
-		return
 	}
+	return
 }

@@ -411,20 +411,14 @@ definitions:
     properties:
       deadline:
         type: string
-      semester:
+      id:
+        type: string
+      paid:
         type: integer
       tuition:
         type: integer
       tuition_status:
         $ref: '#/definitions/models.TuStatus'
-      user_id:
-        type: string
-      year:
-        type: integer
-    required:
-    - semester
-    - user_id
-    - year
     type: object
   users.ChangePassRequest:
     properties:
@@ -1708,6 +1702,12 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/users.ChangePassRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:

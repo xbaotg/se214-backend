@@ -1897,6 +1897,14 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/users.ChangePassRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3092,16 +3100,14 @@ const docTemplate = `{
         },
         "tuition.UpdateTuitionRequest": {
             "type": "object",
-            "required": [
-                "semester",
-                "user_id",
-                "year"
-            ],
             "properties": {
                 "deadline": {
                     "type": "string"
                 },
-                "semester": {
+                "id": {
+                    "type": "string"
+                },
+                "paid": {
                     "type": "integer"
                 },
                 "tuition": {
@@ -3109,12 +3115,6 @@ const docTemplate = `{
                 },
                 "tuition_status": {
                     "$ref": "#/definitions/models.TuStatus"
-                },
-                "user_id": {
-                    "type": "string"
-                },
-                "year": {
-                    "type": "integer"
                 }
             }
         },

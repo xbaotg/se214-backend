@@ -51,7 +51,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	// user routes
 	protectedRouter.GET("/user/info", func(c *gin.Context) { usersController.GetUserInfo(c, app) })
 	protectedRouter.GET("/user/list", func(c *gin.Context) { usersController.ListUsers(c, app) })
-	protectedRouter.PATCH("/user/change-password", func(c *gin.Context) { usersController.ChangePassUser(c, app) })
+	protectedRouter.POST("/user/change-pass", func(c *gin.Context) { usersController.ChangePassUser(c, app) })
 	protectedRouter.PUT("/user/update", func(c *gin.Context) { usersController.UpdateUser(c, app) })
 	protectedRouter.DELETE("/user/delete", func(c *gin.Context) { usersController.DeleteUser(c, app) })
 

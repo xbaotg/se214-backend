@@ -20,6 +20,7 @@ type ChangePassRequest struct {
 // @Accept json
 // @Produce json
 // @Param ChangePassRequest body ChangePassRequest true "ChangePassRequest"
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {object} models.Response
 // @Failure 400 {object} models.Response
 // @Failure 404 {object} models.Response

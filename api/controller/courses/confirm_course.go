@@ -92,5 +92,5 @@ func ConfirmCourse(c *gin.Context, app *bootstrap.App) {
 		return
 	}
 
-	internal.Respond(c, 200, true, "Xác nhận khóa học thành công", nil)
+	internal.Respond(c, 200, true, "Xác nhận khóa học thành công", course)
 }
