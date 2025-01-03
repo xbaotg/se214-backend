@@ -77,7 +77,7 @@ func GetTuition(c *gin.Context, app *bootstrap.App) {
 
 	coursesResponse := []schemas.CreateCourseResponse{}
 	if len(courses) == 0 {
-		internal.Respond(c, 200, true, "Người dùng chưa đăng ký môn học nào", gin.H{"tuition": -1})
+		internal.Respond(c, 404, true, "Người dùng chưa đăng ký môn học nào", gin.H{"tuition": -1})
 		return
 	} else {
 		for _, course := range courses {

@@ -23,6 +23,8 @@ type Config struct {
 
 	CurrentYear int `mapstructure:"CURRENT_YEAR"`
 	CurrentSemester int `mapstructure:"CURRENT_SEMESTER"`
+
+	MaxCredits int `mapstructure:"MAX_CREDITS"`
 }
 
 func NewConfig() *Config {
