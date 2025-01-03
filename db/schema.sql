@@ -96,4 +96,7 @@ ALTER TABLE prerequisite_courses
 ADD CONSTRAINT unique_course_prerequisite
 UNIQUE (course_id, prerequisite_id);
 
+alter table users add constraint unique_username unique (username);
+alter table departments add constraint unique_department_name unique (department_code);
+
 insert into users (username, password, user_fullname, user_role, year) values ('admin', '$2a$10$VFKP3WQvhZRb7CGVag1li.6DjtTKqp3tIoTpDLGPIY4pGQvwC1QXm', 'admin', 'admin', 0);

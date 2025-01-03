@@ -44,6 +44,7 @@ func SetupRoute(r *gin.Engine, app *bootstrap.App) {
 	protectedRouter.POST("/global/tuition_type", func(c *gin.Context) { globalController.SetTuitionType(c, app) })
 	protectedRouter.GET("/global/tuition_type", func(c *gin.Context) { globalController.GetTuitionType(c, app) })
 	protectedRouter.GET("/global/stats", func(c *gin.Context) { globalController.GetStats(c, app) })
+	protectedRouter.POST("/global/upload_data", func(c *gin.Context) { globalController.UploadData(c, app) })
 	// auth routes
 	protectedRouter.GET("/logout", func(c *gin.Context) { authController.Logout(c, app) })
 	protectedRouter.POST("/refresh-token", func(c *gin.Context) { authController.RefreshToken(c, app) })

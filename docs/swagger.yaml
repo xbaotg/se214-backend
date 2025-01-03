@@ -913,6 +913,39 @@ paths:
       summary: Set tuition type
       tags:
       - Global
+  /global/upload_data:
+    post:
+      description: Upload data
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Upload data
+      tags:
+      - Global
   /lecturer/course/enroller/list:
     get:
       description: List course enroller

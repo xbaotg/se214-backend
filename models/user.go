@@ -53,7 +53,7 @@ func (ns NullRole) Value() (driver.Value, error) {
 
 type User struct {
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-	Username     string
+	Username     string `gorm:"unique;not null"`
 	Password     string
 	UserEmail    string
 	UserFullname string
